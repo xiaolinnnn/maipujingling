@@ -77,10 +77,25 @@ export default class Broker extends wepy.page {
         filePath: this.photo1,
         name: 'pic',
         success: res => {
-          console.log(JSON.parse(res.data).url)
+          let url1 = JSON.parse(res.data).url
         }
-      })
-     
+      }),
+        wx.uploadFile({
+          url: 'http://api.dgweidao.com/api/v1/upload/singleImg',
+          filePath: this.photo2,
+          name: 'pic',
+          success: res => {
+            let url2 = JSON.parse(res.data).url
+          }
+        }),
+        wx.uploadFile({
+          url: 'http://api.dgweidao.com/api/v1/upload/singleImg',
+          filePath: this.photo3,
+          name: 'pic',
+          success: res => {
+            let url3 = JSON.parse(res.data).url
+          }
+        })
     },
     getPhoto1() {
       wx.chooseImage({

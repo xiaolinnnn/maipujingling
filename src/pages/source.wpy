@@ -235,6 +235,7 @@ export default class Source extends wepy.page {
         key: 'search',
         data: source,
         success: () => {
+          this.storeList = []
           this.getData()
           this.$apply()
         }
@@ -304,6 +305,8 @@ export default class Source extends wepy.page {
         key: 'search',
         data: source,
         success: res => {
+          this.page = 1
+          this.storeList = []
           this.getData()
           this.$apply()
         }
@@ -352,6 +355,8 @@ export default class Source extends wepy.page {
         key: 'search',
         data: source,
         success: res => {
+          this.page = 1
+          this.storeList = []
           this.getData()
           this.$apply()
         }
@@ -392,7 +397,7 @@ export default class Source extends wepy.page {
       source.max_price = this.max_price
       this.specific.forEach(item => {
         if (item.id === 3) {
-          item.value = this.min_price + '-' + this.max_price + '万'
+          item.value = source.min_price + '-' + source.max_price + '万'
           if (this.priceDown && this.priceUp) {
             source.min_price = parseInt(this.priceDown)
             source.max_price = parseInt(this.priceUp)
@@ -404,6 +409,8 @@ export default class Source extends wepy.page {
         key: 'search',
         data: source,
         success: res => {
+          this.page = 1
+          this.storeList = []
           this.getData()
           this.$apply()
         }
@@ -477,7 +484,6 @@ export default class Source extends wepy.page {
         rows: this.rows
       },
       success: res => {
-        console.log(res)
         wx.stopPullDownRefresh()
         if (res.data.code === 404) {
           wx.showToast({
@@ -487,21 +493,24 @@ export default class Source extends wepy.page {
             mask: false
           })
           wx.hideNavigationBarLoading()
-          return
         }
-
-        // var storeList = res.data.data //第一页
-        // var oldstoreList = this.storeList
-        // for (var i = 0; i < storeList.length; i++) {
-        //   oldstoreList.push(storeList[i])
-        // }
-        // this.storeList = oldstoreList
-        this.storeList = res.data.data
-        this.$apply()
+        wx.hideNavigationBarLoading()
+        if (!!res.data.data) {
+          var storeList = res.data.data //第一页
+          var oldstoreList = this.storeList
+          for (var i = 0; i < storeList.length; i++) {
+            oldstoreList.push(storeList[i])
+          }
+          this.storeList = oldstoreList
+          this.$apply()
+        }
       }
     })
   }
+
   onPullDownRefresh() {
+    this.page = 1
+    this.storeList = []
     wx.showNavigationBarLoading()
     this.getData()
   }
