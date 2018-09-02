@@ -1,0 +1,692 @@
+<!--  -->
+<template>
+  <view class='container'>
+    <view class='header'>
+      <block wx:for="{{tabs}}" wx:key="">
+        <view class='li' @tap="showModel({{index}})">
+          <view class='san_img'>{{item.name}}
+            <image src='{{item.img}}' mode='aspectFit' />
+          </view>
+        </view>
+      </block>
+    </view>
+    <view class='list_li'>
+      <block wx:for="{{specific}}" wx:for-index="index" wx:key="item.id">
+        <view hidden="{{!item.value}}" class='li_li'>{{item.value}}
+          <view class='posi_img' @tap="remove({{item.id}})">
+            <text class="iconfont icon-shanchu"></text>
+          </view>
+        </view>
+      </block>
+
+    </view>
+    <view class='choice'>
+      <block wx:for="{{storeList}}" wx:key="">
+        <view @tap="toDetail({{item.id}})" class='choice_box sole_box'>
+          <view class='sole_buju'>
+            <view class='sole_img'>
+              <image src='{{item.img}}' />
+            </view>
+            <view class='sole_right'>
+              <view class='r_top'>
+                <view class='r_top1'>
+                  <text>{{item.title}}</text>
+                </view>
+                <view class='r_top3'>
+                  <text>{{item.min_area}}-{{item.max_area}}m²</text>
+                </view>
+              </view>
+              <view class='r_center'>
+                <view class='r_center11'>
+                  <text>{{item.advantage}}</text>
+                </view>
+                <view class='r_center_2'>销售均价</view>
+                <view class='r_center12'>
+                  <text>{{item.price}}/m²</text>
+                </view>
+              </view>
+              <view class='r_center1'>
+                <block wx:for="{{item.tags}}" wx:key="" wx:for-item="subitem">
+                  <view class='r_view'>
+                    <text>{{subitem.name}}</text>
+                  </view>
+                </block>
+              </view>
+            </view>
+          </view>
+        </view>
+      </block>
+    </view>
+  </view>
+  <!-- 区域 -->
+  <view class="modalFrame" hidden="{{!isShowArea}}">
+    <view class="roof">
+      <scroll-view class="left base" scroll-y scroll-with-animation @scroll="">
+        <view>
+          <view class="total">全部</view>
+          <block wx:for="{{regionList}}" wx:key="">
+            <view @tap="select({{index}},{{item.name}})" class="{{index==leftIndex?'active':''}}">{{item.name}}</view>
+          </block>
+        </view>
+      </scroll-view>
+      <scroll-view class="right base" scroll-y scroll-with-animation @scroll="">
+        <view>
+          <block wx:for="{{regionList[leftIndex].tArea}}" wx:key="item.cityId">
+            <view @tap="chioce({{index}},{{item.name}})" class="{{index==rightIndex?'active':''}}">{{item.name}}</view>
+          </block>
+        </view>
+      </scroll-view>
+    </view>
+    <view class="bottom">
+      <view @tap="clear" class="clear botton">清除</view>
+      <view @tap="confirm" class="confirm botton">确定</view>
+    </view>
+  </view>
+  <!-- 面积 -->
+  <view class="modelAcreage" hidden="{{!isShowAcreage}}">
+    <view class="top">
+      <block wx:for="{{areaList}}" wx:key="">
+        <view @tap="selectItem({{index}},{{item.name}})" data-min_area="{{item.min_area}}" data-max_area="{{item.max_area}}" class="head {{areaIndex==index?'active':''}}">{{item.name}}</view>
+      </block>
+    </view>
+    <view class="bottom">
+      <view class="price">自定义面积</view>
+      <view class="count">
+        <view class="left">
+          <input @input="areaDown" class="down" placeholder-style="font-size:26rpx" value="{{areaDown}}" type="text" placeholder="下限">
+          </input>
+          <text class="to">至</text>
+          <input @input="areaUp" class="up" placeholder-style="font-size:26rpx" value="{{areaUp}}" type="text" placeholder="上限">
+          </input>
+        </view>
+        <view @tap="ensure" class="right">
+          <view class="ensure">确定</view>
+        </view>
+      </view>
+    </view>
+  </view>
+  <!-- 售价 -->
+  <view class="modelPrice" hidden="{{!isShowPrice}}">
+    <view class="top">
+      <block wx:for="{{priceList}}" wx:key="">
+        <view @tap="priceItem({{index}},{{item.name}})" data-min_price="{{item.min_price}}" data-max_price="{{item.max_price}}" class="head {{priceIndex==index?'active':''}}">{{item.name}}
+        </view>
+      </block>
+    </view>
+    <view class="bottom">
+      <view class="totalPrice">自定义总价范围(百万)</view>
+      <view class="count">
+        <view class="left">
+          <input @input="priceDown" class="down" placeholder-style="font-size:26rpx" value="{{priceDown}}" type="text" placeholder="总价下限/百万">
+          </input>
+          <text class="to">至</text>
+          <input @input="priceUp" class="up" placeholder-style="font-size:26rpx" value="{{priceUp}}" type="text" placeholder="总价上限/百万">
+          </input>
+        </view>
+      </view>
+      <view class="button">
+        <view @tap="reset" class="reset">重置</view>
+        <view @tap="ascertain" class="ascertain">确定</view>
+      </view>
+    </view>
+  </view>
+  <!-- 遮罩 -->
+  <view class="mask" hidden="{{!isShowMask}}"></view>
+  <!-- <view class="pull iconfont icon-xiao">上拉加载更多!</view> -->
+</template>
+
+<script>
+import wepy from 'wepy'
+var method = require('../utils/method.js')
+export default class Source extends wepy.page {
+  config = {
+    navigationBarTitleText: '铺源列表',
+    enablePullDownRefresh: true,
+    onReachBottomDistance: 50,
+    backgroundTextStyle: 'dark'
+  }
+
+  data = {
+    tabs: [
+      {
+        name: '区域',
+        img: '/images/btn_xiala.png'
+      },
+      {
+        name: '面积',
+        img: '/images/btn_xiala.png'
+      },
+      {
+        name: '费用',
+        img: '/images/btn_xiala.png'
+      }
+    ],
+    areaList: [
+      { name: '不限', min_area: 0, max_area: 0 },
+      { name: '20m²以下', min_area: 0, max_area: 20 },
+      { name: '20m²-50m²', min_area: 20, max_area: 50 },
+      { name: '50m²-100m²', min_area: 50, max_area: 100 },
+      { name: '100m²-200m²', min_area: 100, max_area: 200 },
+      { name: '200m²-500m²', min_area: 200, max_area: 500 },
+      { name: '500m²以上', min_area: 500, max_area: 0 }
+    ],
+    priceList: [
+      { name: '50万以下', min_price: 0, max_price: 50 },
+      { name: '50-100万', min_price: 50, max_price: 100 },
+      { name: '100-200万', min_price: 100, max_price: 200 },
+      { name: '200-300万', min_price: 200, max_price: 300 },
+      { name: '300-400万', min_price: 300, max_price: 400 },
+      { name: '400万以上', min_price: 400, max_price: 0 }
+    ],
+    specific: [
+      { id: 1, value: '' },
+      { id: 2, value: '' },
+      { id: 3, value: '' }
+    ],
+    isShowMask: false, //遮罩
+    isShowArea: false, //区域
+    isShowAcreage: false, //面积
+    isShowPrice: false, //价格
+    cityList: [], //城市列表
+    regionList: [], //区域列表
+    storeList: [],
+    leftIndex: 0, //区域左边索引
+    rightIndex: undefined, //区域右边索引
+    areaIndex: undefined, //面积索引
+    priceIndex: undefined, //价格索引
+    areaDown: '', //自定义面积下限
+    areaUp: '', //自定义面积上限
+    priceDown: '', //总价下限
+    priceUp: '', //总价上限
+    areaName: '', //区域名字
+    regionName: '', //商圈名字
+    acreageName: '', //面积名字
+    priceName: '', //价格名字
+    cityId: 440300, //城市id
+    a_id: '', //区域id
+    min_area: '', //最小面积
+    max_area: '', //最大面积
+    min_price: '', //最小价格
+    max_price: '', //最大价格
+    page: 1,
+    rows: 10
+  }
+
+  components = {}
+
+  methods = {
+    remove(activeId) {
+      let source = wx.getStorageSync('search')
+      this.specific.forEach(item => {
+        if (item.id === activeId) {
+          item.value = ''
+        }
+        if (activeId === 1) {
+          source.trading_area = ''
+        } else if (activeId === 2) {
+          source.min_area = ''
+          source.max_area = ''
+        } else if (activeId === 3) {
+          source.min_price = ''
+          source.max_price = ''
+        }
+      })
+      wx.setStorage({
+        key: 'search',
+        data: source,
+        success: () => {
+          this.getData()
+          this.$apply()
+        }
+      })
+    },
+    // 点击上面导航栏
+    showModel(index) {
+      if (index === 0) {
+        this.leftIndex = 0
+        this.rightIndex = -1
+        method.request({
+          url: 'api/v1/area',
+          method: 'post',
+          data: { cityId: this.cityId },
+          success: res => {
+            this.regionList = res.data.data
+            this.$apply()
+          }
+        })
+        this.isShowArea = true
+        this.isShowMask = true
+      } else if (index === 1) {
+        this.isShowAcreage = true
+        this.isShowMask = true
+      } else {
+        this.isShowPrice = true
+        this.isShowMask = true
+      }
+    },
+    // 区域左边
+    select(index, name) {
+      this.areaName = name
+      this.leftIndex = index
+      this.rightIndex = -1
+    },
+    // 区域右边
+    chioce(index, name) {
+      this.regionName = name
+      this.rightIndex = index
+    },
+    // 区域取消
+    clear() {
+      this.isShowArea = false
+      this.isShowMask = false
+    },
+
+    // 区域确定
+    confirm() {
+      if (!this.regionName) {
+        wx.showToast({
+          title: '请选择区域',
+          icon: 'none',
+          duration: 1500,
+          mask: false
+        })
+        return
+      }
+      let source = wx.getStorageSync('search')
+      source.trading_area = this.regionName
+      this.specific.forEach(item => {
+        if (item.id === 1) {
+          item.value = source.trading_area
+        }
+      })
+
+      wx.setStorage({
+        key: 'search',
+        data: source,
+        success: res => {
+          this.getData()
+          this.$apply()
+        }
+      })
+      this.isShowArea = false
+      this.isShowMask = false
+    },
+    // 面积确定
+    ensure() {
+      this.areaIndex = -1
+      if (!this.areaDown && !this.areaUp && !this.acreageName) {
+        wx.showToast({
+          title: '请选择面积',
+          icon: 'none',
+          duration: 1500,
+          mask: false
+        })
+        return
+      }
+      if (this.areaDown > this.areaUp) {
+        wx.showToast({
+          title: '请重新输入',
+          icon: 'none',
+          duration: 1500,
+          mask: false
+        })
+        return
+      }
+      let source = wx.getStorageSync('search')
+      source.min_area = this.min_area
+      source.max_area = this.max_area
+      this.specific.forEach(item => {
+        if (item.id === 2) {
+          if (this.min_area === 0 && this.max_area === 0) {
+            item.value = '不限'
+          } else if (this.areaDown && this.areaUp) {
+            source.min_area = parseInt(this.areaDown)
+            source.max_area = parseInt(this.areaUp)
+            item.value = source.min_area + '-' + source.max_area + 'm²'
+          } else {
+            item.value = source.min_area + '-' + source.max_area + 'm²'
+          }
+        }
+      })
+      wx.setStorage({
+        key: 'search',
+        data: source,
+        success: res => {
+          this.getData()
+          this.$apply()
+        }
+      })
+      this.isShowAcreage = false
+      this.isShowMask = false
+    },
+    // 选择面积
+    selectItem(index, name, e) {
+      this.min_area = e.currentTarget.dataset.min_area
+      this.max_area = e.currentTarget.dataset.max_area
+      this.acreageName = name
+      this.areaIndex = index
+    },
+    // 售价确定
+    ascertain() {
+      this.priceIndex = -1
+      if (!this.priceDown && !this.priceUp && !this.priceName) {
+        wx.showToast({
+          title: '请选择售价',
+          icon: 'none',
+          duration: 1500,
+          mask: false
+        })
+        return
+      }
+      if (this.priceDown > this.priceUp) {
+        wx.showToast({
+          title: '请重新输入',
+          icon: 'none',
+          duration: 1500,
+          mask: false
+        })
+        return
+      }
+      let source = wx.getStorageSync('search')
+      source.min_price = this.min_price
+      source.max_price = this.max_price
+      this.specific.forEach(item => {
+        if (item.id === 3) {
+          item.value = this.min_price + '-' + this.max_price + '万'
+          if (this.priceDown && this.priceUp) {
+            source.min_price = parseInt(this.priceDown)
+            source.max_price = parseInt(this.priceUp)
+            item.value = source.min_price + '-' + source.max_price + '万'
+          }
+        }
+      })
+      wx.setStorage({
+        key: 'search',
+        data: source,
+        success: res => {
+          this.getData()
+          this.$apply()
+        }
+      })
+      this.isShowPrice = false
+      this.isShowMask = false
+    },
+    // 售价重置
+    reset() {
+      this.priceDown = ''
+      this.priceUp = ''
+      this.priceIndex = -1
+    },
+    // 选择售价
+    priceItem(index, name, e) {
+      this.min_price = e.currentTarget.dataset.min_price
+      this.max_price = e.currentTarget.dataset.max_price
+      this.priceName = name
+      this.priceIndex = index
+    },
+    // 自定义面积下限
+    areaDown(e) {
+      this.areaDown = e.detail.value
+    },
+    // 自定义面积上限
+    areaUp(e) {
+      this.areaUp = e.detail.value
+    },
+    //总价上限
+    priceDown(e) {
+      this.priceDown = e.detail.value
+    },
+    //总价下限
+    priceUp(e) {
+      this.priceUp = e.detail.value
+    },
+    // 去详情
+    toDetail(id) {
+      wx.navigateTo({
+        url: `/pages/investment?id=${id}`
+      })
+    }
+  }
+
+  events = {}
+
+  watch = {}
+
+  computed = {}
+
+  onLoad() {
+    this.getData()
+  }
+
+  onShow() {}
+
+  getData() {
+    let source = wx.getStorageSync('search')
+    method.request({
+      url: 'api/v1/search/invest',
+      method: 'POST',
+      data: {
+        cityId: source.cityId,
+        a_id: source.a_id,
+        trading_area: source.trading_area,
+        min_area: source.min_area,
+        max_area: source.max_area,
+        min_price: source.min_price,
+        max_price: source.max_price,
+        page: this.page,
+        rows: this.rows
+      },
+      success: res => {
+        console.log(res)
+        wx.stopPullDownRefresh()
+        if (res.data.code === 404) {
+          wx.showToast({
+            title: '没有数据啦',
+            icon: 'none',
+            duration: 1500,
+            mask: false
+          })
+          wx.hideNavigationBarLoading()
+          return
+        }
+
+        // var storeList = res.data.data //第一页
+        // var oldstoreList = this.storeList
+        // for (var i = 0; i < storeList.length; i++) {
+        //   oldstoreList.push(storeList[i])
+        // }
+        // this.storeList = oldstoreList
+        this.storeList = res.data.data
+        this.$apply()
+      }
+    })
+  }
+  onPullDownRefresh() {
+    wx.showNavigationBarLoading()
+    this.getData()
+  }
+  onReachBottom() {
+    wx.showNavigationBarLoading()
+    this.page += 1
+    this.getData()
+  }
+}
+</script>
+
+<style lang='less'>
+page {
+  height: 1300rpx;
+}
+.header {
+  height: 80rpx;
+  display: flex;
+  font-size: 26rpx;
+  line-height: 80rpx;
+  justify-content: space-around;
+  background: #f4f4f4;
+  color: #666;
+  .san_img {
+    image {
+      display: inline-block;
+      width: 16rpx;
+      height: 12rpx;
+      margin-left: 10rpx;
+    }
+  }
+}
+.list_li {
+  width: 100%;
+  background: #fff;
+}
+.li_li {
+  display: inline-block;
+  padding: 14rpx 28rpx 13rpx 28rpx;
+  font-size: 22rpx;
+  background: #d8f8ff;
+  color: #16b5d7;
+  margin: 28rpx 0 24rpx 30rpx;
+  position: relative;
+}
+
+.li_li .posi_img {
+  position: absolute;
+  right: -5rpx;
+  bottom: 0;
+}
+.li_li .posi_img text {
+  display: block;
+  width: 22rpx;
+  height: 22rpx;
+}
+
+.choice {
+  margin-top: 6rpx;
+  background: #fff;
+  .choice_box {
+    display: flex;
+  }
+  .sole_box {
+    flex-direction: column;
+  }
+  .sole_buju {
+    width: 701rpx;
+    margin: 0 auto;
+    display: flex;
+    margin-top: 43rpx;
+    border-bottom: 1rpx solid #ccc;
+    .sole_img {
+      image {
+        width: 200rpx;
+        height: 140rpx;
+        margin-bottom: 20rpx;
+      }
+    }
+    .sole_right {
+      width: 485rpx;
+      margin-left: 21rpx;
+      display: flex;
+      flex-direction: column;
+      .r_top {
+        display: flex;
+        .r_top1 {
+          font-size: 30rpx;
+          line-height: 30rpx;
+        }
+        .r_top3 {
+          display: inline-block;
+          font-size: 22rpx;
+          height: 22rpx;
+          margin-left: 20rpx;
+        }
+      }
+      .r_center {
+        font-size: 26rpx;
+        color: #9c9c9c;
+        margin: 10rpx 0;
+        display: flex;
+        line-height: 30rpx;
+        .r_center11 {
+          width: 200rpx;
+          overflow: hidden; /*  溢出隐藏   */
+          text-overflow: ellipsis; /*显示省略号*/
+          white-space: nowrap; /*不换行*/
+        }
+        .r_center_2 {
+          text-align: right;
+          margin-right: 10rpx;
+        }
+        .r_center12 {
+          text {
+            font-size: 22rpx;
+            color: #ee3e3e;
+          }
+        }
+      }
+      .r_center1 {
+        display: flex;
+        font-size: 20rpx;
+        flex-wrap: wrap;
+        .r_view {
+          background: #eeeeee;
+          padding: 10rpx 15rpx;
+          margin-left: 15rpx;
+          margin-top: 10rpx;
+        }
+      }
+    }
+  }
+}
+
+.modelPrice {
+  top: 80rpx;
+}
+.modelAcreage {
+  top: 80rpx;
+}
+.top {
+  padding: 20rpx 30rpx;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  box-sizing: border-box;
+  .head {
+    width: 200rpx;
+    height: 56rpx;
+    background-color: #fff;
+    line-height: 56rpx;
+    text-align: center;
+    font-size: 24rpx;
+    color: #666;
+  }
+}
+.modalFrame {
+  top: 80rpx;
+  .roof {
+    height: 560rpx;
+    display: flex;
+    .total {
+      font-weight: bold;
+      color: #111;
+    }
+    .left {
+      width: 50%;
+      background-color: #eee;
+    }
+    .right {
+      width: 50%;
+      background-color: #fff;
+    }
+    .base {
+      font-size: 26rpx;
+      color: #666;
+      view {
+        height: 80rpx;
+        width: 100%;
+        line-height: 80rpx;
+        text-align: center;
+      }
+    }
+  }
+}
+</style>

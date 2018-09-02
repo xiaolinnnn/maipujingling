@@ -1,0 +1,266 @@
+<!--  -->
+<template>
+  <view class='container'>
+
+    <view class='top'>
+      <text>上传营业执照以及身份证照片</text>
+    </view>
+    <view class='top1'>
+      <view class='top1_1 flex-grow-1'>证件照片</view>
+      <view class='top1_2 flex-grow-0'>*必填项</view>
+    </view>
+    <view class='top3'>
+      <view class='top3_1 top_3'>
+        <image @tap="getPhoto1" src='{{photo1}}' mode='aspectFill' />
+        <view class="add">+</view>
+      </view>
+      <view class='top3_2 top_3'>
+        <image @tap="getPhoto2" src='{{photo2}}' mode='aspectFill' />
+        <view class="add">+</view>
+      </view>
+      <view class='top3_3 top_3'>
+        <image @tap="getPhoto3" src='{{photo3}}' mode='aspectFill' />
+        <view class="add">+</view>
+      </view>
+    </view>
+
+    <view class='top4'>
+      <view class='top4_1 top_4'>营业执照</view>
+      <view class='top4_2 top_4'>身份证正面</view>
+      <view class='top4_3 top_4'>身份证反面</view>
+    </view>
+
+    <view class='btn' @tap='upload'>上传</view>
+  </view>
+
+</template>
+
+<script>
+import wepy from 'wepy'
+var method = require('../utils/method.js')
+export default class Broker extends wepy.page {
+  config = {
+    navigationBarTitleText: '经纪人认证'
+  }
+
+  data = {
+    photo1: '',
+    photo2: '',
+    photo3: '',
+    token: '',
+    imgArr: [],
+    nameArr: ['business', 'id_card_z', 'id_card_f']
+  }
+
+  components = {}
+
+  methods = {
+    upload() {
+      this.token = wx.getStorageSync('token')
+      // for (let i = 0; i < this.imgArr.length; i++) {
+      //   console.log(this.imgArr[i])
+      //   console.log(this.nameArr[i])
+      //   wx.uploadFile({
+      //     url: 'http://api.dgweidao.com/api/v1/agent/auth',
+      //     filePath: this.imgArr[i],
+      //     name: this.nameArr[i],
+      //     formData: {
+      //       token: this.token
+      //     },
+      //     success: res => {
+      //       console.log(res)
+      //     }
+      //   })
+      // }
+      wx.uploadFile({
+        url: 'http://api.dgweidao.com/api/v1/upload/singleImg',
+        filePath: this.photo1,
+        name: 'pic',
+        success: res => {
+          console.log(JSON.parse(res.data).url)
+        }
+      })
+     
+    },
+    getPhoto1() {
+      wx.chooseImage({
+        count: 1,
+        success: res => {
+          this.photo1 = res.tempFilePaths[0]
+          // console.log(this.photo1)
+          this.imgArr.push(this.photo1)
+          this.$apply()
+        }
+      })
+    },
+    getPhoto2() {
+      wx.chooseImage({
+        count: 1,
+        success: res => {
+          this.photo2 = res.tempFilePaths[0]
+          this.imgArr.push(this.photo2)
+          this.$apply()
+        }
+      })
+    },
+    getPhoto3() {
+      wx.chooseImage({
+        count: 1,
+        success: res => {
+          this.photo3 = res.tempFilePaths[0]
+          this.imgArr.push(this.photo3)
+          this.$apply()
+        }
+      })
+    }
+  }
+
+  events = {}
+
+  watch = {}
+
+  computed = {}
+
+  onLoad() {}
+
+  onShow() {}
+}
+</script>
+
+<style lang='less'>
+/* pages/mine1/attestation/attestation.wxss */
+
+.top {
+  width: 100%;
+  height: 100rpx;
+  font-size: 26rpx;
+  color: #54c9e2;
+  text-align: center;
+  line-height: 100rpx;
+  background: #d7f8ff;
+}
+
+.top1 {
+  width: 100%;
+  height: 100rpx;
+  display: flex;
+  line-height: 100rpx;
+}
+
+.top1_1 {
+  font-size: 30rpx;
+  margin-left: 25rpx;
+}
+.top1_2 {
+  font-size: 26rpx;
+  color: #ff8e8e;
+  margin-right: 25rpx;
+}
+
+.top3,
+.top4 {
+  display: flex;
+  background: #fff;
+}
+.top_3 {
+  width: 184rpx;
+  height: 184rpx;
+  background: #eeeeee;
+  margin-top: 74rpx;
+  position: relative;
+}
+.top3 .top3_1,
+.top4 .top4_1 {
+  margin-left: 24rpx;
+}
+
+.top_3,
+.top_4 {
+  margin-left: 74rpx;
+}
+.top_3 image {
+  width: 184rpx;
+  height: 184rpx;
+}
+
+.top_4 {
+  width: 184rpx;
+  background: #fff;
+  font-size: 26rpx;
+  color: #999;
+  text-align: center;
+  margin-top: 27rpx;
+  margin-bottom: 64rpx;
+}
+
+.btn {
+  width: 702rpx;
+  height: 80rpx;
+  background: linear-gradient(0deg, rgba(0, 176, 214, 1), rgba(0, 214, 211, 1));
+  border-radius: 4rpx;
+  font-size: 30rpx;
+  font-family: PingFang-SC-Bold;
+  color: rgba(255, 255, 255, 1);
+  line-height: 70rpx;
+  text-align: center;
+  margin: 0 auto;
+  margin-top: 70rpx;
+}
+
+/* 遮罩开始 */
+.buydes-dialog-container {
+  width: 100%;
+  height: 100%;
+  background-color: rgba(14, 19, 18, 0.281);
+  position: fixed;
+  top: 0;
+  z-index: 999;
+}
+
+.buydes-dialog-container-top {
+  flex-grow: 1;
+  text-align: center;
+  line-height: 250rpx;
+}
+
+.buydes-dialog-container-bottom {
+  display: flex;
+  flex-grow: 0;
+  flex-direction: column;
+  position: fixed;
+  left: 25rpx;
+  bottom: 0;
+  width: 700rpx;
+}
+
+.buydes-dialog-container-bottom-item {
+  padding: 24rpx;
+  display: flex;
+  border-bottom: 1rpx solid #eeeeee;
+  background: #fff;
+  font-size: 30rpx;
+  border-radius: 6rpx;
+}
+.view_img image {
+  width: 44rpx;
+  height: 32rpx;
+  margin-right: 35rpx;
+}
+.buydes-dialog-container-bottom-item-1 {
+  padding: 24rpx;
+  border-bottom: 1rpx solid #eeeeee;
+  background: #fff;
+  font-size: 30rpx;
+  margin-top: 50rpx;
+  text-align: center;
+  border-radius: 6rpx;
+}
+/* 遮罩结束 */
+.add {
+  color: #9a9a9a;
+  position: absolute;
+  left: 80rpx;
+  top: 65rpx;
+  opacity: 0.2;
+}
+</style>

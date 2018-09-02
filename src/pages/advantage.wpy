@@ -1,0 +1,52 @@
+<template>
+  <view class='text'>
+    <text>{{advantage}}</text>
+  </view>
+</template>
+
+<script>
+import wepy from 'wepy'
+export default class Advantage extends wepy.page {
+  config = {
+    navigationBarTitleText: '项目优势'
+  }
+
+  data = {
+    advantage: ''
+  }
+
+  components = {}
+
+  methods = {}
+
+  events = {}
+
+  watch = {}
+
+  computed = {}
+
+  onLoad(option) {
+    this.advantage = option.advantage
+  }
+
+  onShow() {}
+}
+</script>
+
+<style lang='less'>
+.text {
+  width: 648rpx;
+  height: 362rpx;
+  margin: 0 auto;
+  margin-top: 50rpx;
+}
+.text text {
+  text-indent: 2em;
+  display: block;
+  font-size: 26rpx;
+  font-family: PingFang-SC-Medium;
+  color: rgba(0, 0, 51, 1);
+  line-height: 40rpx;
+  text-align: justify;
+}
+</style>

@@ -1,0 +1,285 @@
+<template>
+  <view class='tel'>
+    <input @input="getMobile" type="number" placeholder='手机号' value="{{mobile}}" />
+    <text @tap="getCode" disabled='{{disabled}}' class="getCode">{{time}}</text>
+  </view>
+  <view class='verification'><input type="number" @input="code" value="{{code}}" placeholder='验证码' /></view>
+
+  <view class='register'>
+    <button>登录</button>
+  </view>
+  <button class="login" open-type="getUserInfo" @tap="toPerson">登录</button>
+  <!-- <view class='beijing'> -->
+    <!-- <view class='line1'></view>
+    <view class='tit'>
+      <text>or</text>
+    </view> -->
+    <!-- <view class='line2'></view> -->
+  <!-- </view> -->
+  <!-- <view @tap="weChat" class='wx_img'>
+    <image src='./images/icon_wexin.png' mode='widthFix' />
+  </view> -->
+
+  <!-- <view class='wx_text'>
+    <text>微信登录</text>
+  </view> -->
+  <!-- <button class="weChat" open-type="getUserInfo" @tap="toWeChat">微信登录</button> -->
+</template>
+
+<script>
+import wepy from 'wepy'
+var method = require('../utils/method.js')
+export default class Login extends wepy.page {
+  config = {
+    navigationBarTitleText: '会员登录'
+  }
+
+  data = {
+    time: '获取验证码',
+    currentTime: 60, //倒计时
+    mobile: '', //手机号
+    code: '', //验证码
+    avatar: '', //头像
+    nickname: '', //用户名
+    openid: '', //openid
+    userInfo: {},
+    disabled: true
+  }
+
+  components = {}
+
+  methods = {
+    getCode(e) {
+      var myreg = /^(((13[0-9]{1})|(15[0-9]{1})|(18[0-9]{1})|(17[0-9]{1}))+\d{8})$/
+      if (!myreg.test(this.mobile)) {
+        wx.showToast({
+          title: '手机号有误',
+          icon: 'none',
+          duration: 1500,
+          mask: false
+        })
+        return false
+      }
+      method.request({
+        url: 'api/v1/sendLoginSms',
+        method: 'post',
+        data: { mobile: this.mobile },
+        success: res => {
+          if (res.data.code === 200) {
+            wx.showToast({
+              title: '发送成功',
+              icon: 'none',
+              duration: 1500,
+              mask: false
+            })
+          } else {
+            wx.showToast({
+              title: '发送失败',
+              icon: 'none',
+              duration: 1500,
+              mask: false
+            })
+          }
+        }
+      })
+    },
+    // 获取手机号
+    getMobile(e) {
+      this.mobile = e.detail.value
+    },
+    // 获取输入的验证码的值
+    code(e) {
+      this.code = e.detail.value
+    },
+    toPerson() {
+      var myreg = /^(((13[0-9]{1})|(15[0-9]{1})|(18[0-9]{1})|(17[0-9]{1}))+\d{8})$/
+      if (!myreg.test(this.mobile)) {
+        wx.showToast({
+          title: '手机号有误',
+          icon: 'none',
+          duration: 1500,
+          mask: false
+        })
+        return false
+      }
+      if (!this.code.trim()) {
+        wx.showToast({
+          title: '请输入验证码',
+          icon: 'none',
+          duration: 1500,
+          mask: false
+        })
+      }
+      wx.login({
+        success: res => {
+          var code = res.code
+          var appId = 'wxa2933d6928dc3849'
+          var secret = '73e472a4bc52e295854c68113f9b712b'
+          wx.getUserInfo({
+            withCredentials: 'false',
+            lang: 'zh_CN',
+            success: res => {
+              this.avatar = res.userInfo.avatarUrl
+              this.nickname = res.userInfo.nickName
+              wx.request({
+                url:
+                  'https://api.weixin.qq.com/sns/jscode2session?appid=' +
+                  appId +
+                  '&secret=' +
+                  secret +
+                  '&js_code=' +
+                  code +
+                  '&grant_type=authorization_code',
+                method: 'GET',
+                header: {
+                  'content-type': 'json'
+                },
+                success: res => {
+                  this.openid = res.data.openid
+                  method.request({
+                    url: 'api/v1/user/login',
+                    method: 'post',
+                    data: { mobile: this.mobile, captcha: this.code },
+                    success: res => {
+                      console.log(res)
+                      var userInfo = {
+                        mobile: this.mobile,
+                        avatar: this.avatar,
+                        nickname: this.nickname,
+                        openid: this.openid,
+                        captcha: this.code
+                      }
+                      wx.setStorage({
+                        key: 'userInfo',
+                        data: userInfo
+                      })
+                      if (res.data.code === 200) {
+                        wx.switchTab({
+                          url: '/pages/mine'
+                        })
+                        // wx.navigateBack({
+                        //   delta: 1
+                        // });
+                      } else {
+                        wx.showToast({
+                          title: res.data.msg,
+                          icon: 'none',
+                          duration: 1500,
+                          mask: false
+                        })
+                      }
+                    }
+                  })
+                }
+              })
+            }
+          })
+        }
+      })
+    }
+  }
+
+  events = {}
+
+  watch = {}
+
+  computed = {}
+
+  onLoad() {}
+
+  onShow() {}
+}
+</script>
+
+<style lang='less'>
+.verification {
+  width: 568rpx;
+  height: 80rpx;
+  margin: 0 auto;
+  display: flex;
+  background: #d7f8ff;
+  border-radius: 40px;
+  font-size: 28rpx;
+  input {
+    width: 100%;
+    height: 100%;
+    color: #999;
+    padding-left: 28rpx;
+  }
+}
+
+.register {
+  width: 568rpx;
+  height: 80rpx;
+  margin: 0 auto;
+  margin-top: 80rpx;
+  button {
+    background: #00b4d7;
+    width: 568rpx;
+    height: 80rpx;
+    border-radius: 40rpx;
+    color: #fff;
+    font-size: 30rpx;
+  }
+  &::after {
+    border: none;
+  }
+}
+
+.beijing {
+  // width: 346rpx;
+  // height: 10rpx;
+  // margin: 0 auto;
+  // margin-top: 397rpx;
+  // display: flex;
+  // font-size: 30rpx;
+  // color: #999;
+  // .line1,
+  // .line2 {
+  //   width: 160rpx;
+  //   border-top: solid #999 2rpx;
+  //   margin-top: 23rpx;
+  // }
+
+  // .tit {
+  //   width: 44rpx;
+  //   text-align: center;
+  // }
+}
+
+.wx_img {
+  width: 58rpx;
+  height: 50rpx;
+  margin: 0 auto;
+  margin-top: 50rpx;
+  image {
+    width: 58rpx;
+  }
+}
+
+// .wx_text {
+//   font-size: 26rpx;
+//   color: #999;
+//   width: 110rpx;
+//   height: 25rpx;
+//   margin: 0 auto;
+//   margin-top: 20rpx;
+// }
+// .weChat {
+//   width: 70rpx;
+//   height: 70rpx;
+//   position: absolute;
+//   left: 335rpx;
+//   bottom: 220rpx;
+//   opacity: 0;
+// }
+.login {
+  width: 568rpx;
+  height: 80rpx;
+  display: flex;
+  margin-top: -80rpx;
+  opacity: 0;
+  border-radius: 40rpx;
+  justify-content: space-around;
+}
+</style>

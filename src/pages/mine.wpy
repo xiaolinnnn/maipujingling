@@ -1,0 +1,422 @@
+<!--  -->
+<template>
+  <!-- 个人中心 -->
+  <view class="personCenter" wx:if="{{!isShowPerson}}">
+    <view class="info">
+      <image class="head" src="{{userInfo.avatar}}"></image>
+      <view class="personInfo">
+        <view class="headInfo">
+          <text class="name">{{userInfo.nickname}}</text>
+          <image class="prove" src="./images/icon_v.png"></image>
+        </view>
+        <text class="phone">{{userInfo.mobile}}</text>
+      </view>
+    </view>
+    <view class="broker">认证经纪人</view>
+  </view>
+  <!-- 头部 -->
+  <view class='mine_top1' wx:if="{{isShowPerson}}">
+    <view class='tips'>请先登录</view>
+    <view class="login" @tap="toLogin">登录/注册</view>
+  </view>
+
+  <view @tap="toAttention" class="list one">
+    <view class="left">我的关注</view>
+    <view class="right">
+      <text class="iconfont icon-jiantouyou"></text>
+    </view>
+  </view>
+  <view @tap="toBroker" class="list">
+    <view class="left">经纪人验证</view>
+    <view class="right">
+      <text class="iconfont icon-jiantouyou"></text>
+    </view>
+  </view>
+  <view @tap="toWallet" class="list">
+    <view class="left">我的钱包</view>
+    <view class="right">
+      <text class="iconfont icon-jiantouyou"></text>
+    </view>
+  </view>
+  <view @tap="toInviteBroker" class="list">
+    <view class="left">邀请经纪人</view>
+    <view class="right">
+      <text class="iconfont icon-jiantouyou"></text>
+    </view>
+  </view>
+  <view class="footer" @tap="phone">
+    <view class="phone">客服电话</view>
+  </view>
+  <!-- 弹出客服回话开始 -->
+  <view class=" buydes-dialog-container" wx:if="{{!isShowPhone}}">
+    <view class="buydes-dialog-container-bottom">
+      <view class="buydes-dialog-container-bottom-item">
+        <view class='view4_1'>
+          <text>业务咨询,服务热线投诉</text>
+        </view>
+        <view class='view4_2'>
+          <text>400-8888-8888</text>
+        </view>
+        <view class='view4_3'>
+          <text>服务时间：每天9:00到21:00</text>
+        </view>
+        <view class='view4_4'>
+          <view class='left fl' @tap='cancel'>
+            <text>取消</text>
+          </view>
+          <view class='right fr' @tap='cell'>
+            <text>拨打</text>
+          </view>
+        </view>
+      </view>
+
+    </view>
+  </view>
+  <!-- 弹出客服回话结束 -->
+</template>
+
+<script>
+import wepy from 'wepy'
+var method = require('../utils/method.js')
+export default class Mine extends wepy.page {
+  config = {
+    navigationBarTitleText: '个人中心'
+  }
+
+  data = {
+    isShowPhone: true,
+    isShowPerson: true,
+    userInfo: [],
+    token: ''
+  }
+
+  components = {}
+
+  methods = {
+    // 点击客服电话
+    phone() {
+      this.isShowPhone = false
+    },
+    // 点击取消按钮
+    cancel() {
+      this.isShowPhone = true
+    },
+    // 拨打电话
+    cell() {
+      wx.makePhoneCall({
+        phoneNumber: '400-8888-8888',
+        success: () => {}
+      })
+    },
+    toLogin() {
+      wx.navigateTo({
+        url: '/pages/login'
+      })
+    },
+    // 我的关注
+    toAttention() {
+      if (this.isShowPerson === false) {
+      wx.navigateTo({
+        url: '/pages/attention'
+      })
+      } else {
+      //没有登陆 提示登陆
+      wx.showModal({
+        title: '提示',
+        content: '要登录进去哦',
+        showCancel: true,
+        cancelText: '残忍拒绝',
+        cancelColor: '#000000',
+        confirmText: '去登陆',
+        confirmColor: '#00B4D7',
+        success: res => {
+          if (res.confirm) {
+            wx.redirectTo({
+              url: '/pages/login'
+            })
+          }
+        }
+      })
+      }
+    },
+    // 经纪人验证
+    toBroker() {
+      if (this.isShowPerson === false) {
+        wx.navigateTo({
+          url: '/pages/broker'
+        })
+      } else {
+        // 没有登陆 提示登陆
+        wx.showModal({
+          title: '提示',
+          content: '要登录进去哦',
+          showCancel: true,
+          cancelText: '残忍拒绝',
+          cancelColor: '#000000',
+          confirmText: '去登陆',
+          confirmColor: '#00B4D7',
+          success: res => {
+            if (res.confirm) {
+              wx.redirectTo({
+                url: '/pages/login'
+              })
+            }
+          }
+        })
+      }
+    },
+    // 我的钱包
+    toWallet() {
+      if (this.isShowPerson === false) {
+        wx.navigateTo({
+          url: '/pages/wallet'
+        })
+      } else {
+        // 没有登陆 提示登陆
+        wx.showModal({
+          title: '提示',
+          content: '要登录进去哦',
+          showCancel: true,
+          cancelText: '残忍拒绝',
+          cancelColor: '#000000',
+          confirmText: '去登陆',
+          confirmColor: '#00B4D7',
+          success: res => {
+            if (res.confirm) {
+              wx.redirectTo({
+                url: '/pages/login'
+              })
+            }
+          }
+        })
+      }
+    },
+    // 邀请经纪人
+    toInviteBroker() {
+      if (this.isShowPerson === false) {
+        wx.navigateTo({
+          url: '/pages/InviteBroker'
+        })
+      } else {
+        // 没有登陆 提示登陆
+        wx.showModal({
+          title: '提示',
+          content: '要登录进去哦',
+          showCancel: true,
+          cancelText: '残忍拒绝',
+          cancelColor: '#000000',
+          confirmText: '去登陆',
+          confirmColor: '#00B4D7',
+          success: res => {
+            if (res.confirm) {
+              wx.redirectTo({
+                url: '/pages/login'
+              })
+            }
+          }
+        })
+      }
+    }
+  }
+
+  events = {}
+
+  watch = {}
+
+  computed = {}
+
+  onLoad() {}
+  onShow() {
+    var Info = wx.getStorageSync('userInfo')
+    if (Info) {
+      method.request({
+        url: 'api/v1/user/bindInfo',
+        method: 'post',
+        data: {
+          mobile: Info.mobile,
+          openid: Info.openid,
+          avatar: Info.avatar,
+          nickname: Info.nickname,
+          captcha: Info.captcha
+        },
+        success: res => {
+          this.token = res.data.data.userInfo.token
+          this.userInfo = res.data.data.userInfo
+          this.isShowPerson = false
+          wx.setStorageSync('token', this.token)
+          this.$apply()
+        }
+      })
+    }
+  }
+}
+</script>
+
+<style lang='less'>
+// 头部
+.mine_top1 {
+  width: 100%;
+  height: 300rpx;
+  background: #00b6d6;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  .tips {
+    font-size: 26rpx;
+    color: #fff;
+    margin-top: 70rpx;
+  }
+  .login {
+    width: 266rpx;
+    height: 67rpx;
+    background: rgba(255, 255, 255, 1);
+    border-radius: 6rpx;
+    color: #00b2d6;
+    line-height: 64rpx;
+    margin-top: 40rpx;
+    text-align: center;
+  }
+}
+.personCenter {
+  width: 100%;
+  height: 300rpx;
+  background: #00b6d6;
+  overflow: hidden;
+  .info {
+    margin-top: 52rpx;
+    display: flex;
+    margin-left: 51rpx;
+    .head {
+      width: 104rpx;
+      height: 104rpx;
+      border-radius: 50%;
+    }
+    .personInfo {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      .headInfo {
+        .name {
+          font-size: 30rpx;
+          color: #fff;
+          margin-left: 20rpx;
+        }
+        .prove {
+          width: 32rpx;
+          height: 32rpx;
+          margin-left: 5rpx;
+        }
+      }
+      .phone {
+        font-size: 30rpx;
+        color: #fff;
+        margin-left: 20rpx;
+      }
+    }
+  }
+  .broker {
+    position: absolute;
+    right: 0;
+    top: 80rpx;
+    width: 179rpx;
+    height: 60rpx;
+    border-top-left-radius: 50rpx;
+    border-bottom-left-radius: 50rpx;
+    background: rgba(1, 103, 156, 0.3);
+    font-size: 24rpx;
+    color: #fff;
+    line-height: 60rpx;
+    text-align: center;
+  }
+}
+.list {
+  display: flex;
+  justify-content: space-between;
+  height: 109rpx;
+  border-bottom: 1rpx solid #ddd;
+  padding: 0 25rpx;
+  line-height: 109rpx;
+  .left {
+    font-size: 30rpx;
+  }
+  .right {
+    font-size: 26rpx;
+    color: #999;
+    text {
+      color: #ccc;
+      font-size: 22rpx;
+      margin-left: 25rpx;
+    }
+  }
+}
+.one {
+  margin-top: 99rpx;
+}
+.footer {
+  height: 388rpx;
+  background-color: #f4f4f4;
+  padding-top: 82rpx;
+  display: flex;
+  justify-content: space-around;
+  .phone {
+    width: 220rpx;
+    height: 60rpx;
+    background-color: #00b4d7;
+    border-radius: 27rpx;
+    text-align: center;
+    color: #fff;
+    line-height: 60rpx;
+    font-size: 24rpx;
+  }
+}
+.buydes-dialog-container {
+  width: 100%;
+  height: 100%;
+  background-color: rgba(14, 19, 18, 0.281);
+  position: fixed;
+  top: 0;
+  z-index: 999;
+  .buydes-dialog-container-bottom {
+    width: 460rpx;
+    height: 280rpx;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 420rpx;
+    left: 146rpx;
+    background: #fff;
+    .buydes-dialog-container-bottom-item {
+      display: flex;
+      flex-direction: column;
+      text-align: center;
+      .view4_1 {
+        font-size: 26rpx;
+        margin-top: 30rpx;
+      }
+      .view4_2 {
+        color: #ee3e3e;
+        margin-top: 15rpx;
+        font-size: 26rpx;
+      }
+      .view4_3 {
+        font-size: 22rpx;
+        margin-top: 20rpx;
+      }
+      .view4_4 {
+        height: 80rpx;
+        margin-top: 40rpx;
+        border-top: solid 1rpx #dddddd;
+        font-size: 26rpx;
+        position: relative;
+        padding: 23rpx 91rpx;
+        box-sizing: border-box;
+        .right {
+          color: #00b4d7;
+          border-left: 1rpx solid #ddd;
+          padding-left: 91rpx;
+        }
+      }
+    }
+  }
+}
+</style>

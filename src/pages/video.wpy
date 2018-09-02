@@ -1,0 +1,42 @@
+<template>
+  <video id="Video" src="{{video}}" controls></video>
+</template>
+
+<script>
+import wepy from 'wepy'
+export default class Video extends wepy.page {
+  config = {
+    navigationBarTitleText: '视频播放'
+  }
+
+  data = {
+    video: ''
+  }
+
+  components = {}
+
+  methods = {}
+
+  events = {}
+
+  watch = {}
+
+  computed = {}
+
+  onLoad(option) {
+    this.video = option.video
+  }
+
+  onShow() {}
+}
+</script>
+
+<style lang='less'>
+page {
+  background-color: #000a0c;
+}
+#Video {
+  margin: 258rpx 0 488rpx;
+  width: 100%;
+}
+</style>

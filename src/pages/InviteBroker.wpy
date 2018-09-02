@@ -1,0 +1,83 @@
+<template>
+  <view class='common'>
+    <view class='msg1'>
+      <text>邀请人手机号码</text>
+    </view>
+    <view class='msg2'>
+      <input type="number" name="" placeholder='请输入被邀请人的电话号码' /></view>
+    <view class='msg3'>
+      <button>确认邀请</button>
+    </view>
+  </view>
+</template>
+
+<script>
+import wepy from 'wepy'
+export default class InviteBroker extends wepy.page {
+  config = {
+    navigationBarTitleText: '邀请经纪人'
+  }
+
+  data = {}
+
+  components = {}
+
+  methods = {}
+
+  events = {}
+
+  watch = {}
+
+  computed = {}
+
+  onLoad() {}
+
+  onShow() {}
+}
+</script>
+
+<style lang='less'>
+.common {
+  display: flex;
+  flex-direction: column;
+  .msg1 {
+    font-size: 30rpx;
+    color: rgba(51, 51, 51, 1);
+    margin: 179rpx 0 0 44rpx;
+  }
+  .msg2 {
+    width: 660rpx;
+    height: 80rpx;
+    border: 1rpx solid #ddd;
+    margin: 0 auto;
+    margin-top: 50rpx;
+    input {
+      margin-top: 15rpx;
+      font-size: 26rpx;
+      padding-left: 20rpx;
+      border-radius: 6rpx;
+      color: #ddd;
+    }
+  }
+  .msg3 {
+    width: 429rpx;
+    height: 80rpx;
+    margin: 0 auto;
+    margin-top: 398rpx;
+    button {
+      display: block;
+      width: 429rpx;
+      height: 80rpx;
+      font-size: 30rpx;
+      font-family: PingFang-SC-Bold;
+      color: rgba(255, 255, 255, 1);
+      background: linear-gradient(
+        0deg,
+        rgba(0, 176, 214, 1),
+        rgba(0, 214, 211, 1)
+      );
+      border-radius: 6rpx;
+    }
+  }
+}
+</style>

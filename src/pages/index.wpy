@@ -1,0 +1,339 @@
+<style lang="less">
+.posi {
+  position: relative;
+  swiper {
+    width: 100%;
+    height: 474rpx;
+    image {
+      width: 100%;
+      height: 474rpx;
+    }
+  }
+  .header {
+    margin: 0px;
+    padding-top: 10rpx;
+    display: flex;
+    position: absolute;
+    top: 10rpx;
+    right: 24rpx;
+    .place {
+      text {
+        color: #fefefe;
+        font-size: 29rpx;
+        margin-left: 12rpx;
+      }
+      image {
+        display: inline-block;
+        width: 20rpx;
+        height: 26rpx;
+        padding-left: 30rpx;
+        margin-top: 10rpx;
+      }
+    }
+  }
+}
+.botton {
+  margin: 0 auto;
+  width: 220rpx;
+  height: 64rpx;
+  margin-top: 57rpx;
+  button {
+    display: block;
+    font-size: 30rpx;
+    background: #f1726f;
+    color: #fff;
+  }
+}
+.choice {
+  margin-top: 6rpx;
+  background: #fff;
+  .choice1 {
+    display: flex;
+    padding-top: 31rpx;
+    .choice1_1 {
+      font-size: 31rpx;
+      margin-left: 24rpx;
+    }
+  }
+}
+.choice_box {
+  display: flex;
+  flex-direction: column;
+  .sole_buju {
+    width: 701rpx;
+    margin: 0 auto;
+    display: flex;
+    margin-top: 43rpx;
+    border-bottom: 1px solid #ccc;
+    .sole_img {
+      image {
+        width: 200rpx;
+        height: 140rpx;
+        margin-bottom: 20rpx;
+      }
+    }
+    .sole_right {
+      width: 485rpx;
+      margin-left: 21rpx;
+      display: flex;
+      flex-direction: column;
+      .r_top {
+        display: flex;
+        .r_top1 {
+          font-size: 30rpx;
+          line-height: 30rpx;
+        }
+        .r_top3 {
+          display: inline-block;
+          font-size: 22rpx;
+          height: 22rpx;
+          margin-left: 20rpx;
+        }
+      }
+      .r_center {
+        font-size: 26rpx;
+        color: #9c9c9c;
+        margin: 10rpx 0;
+        display: flex;
+        line-height: 30rpx;
+        .r_center11 {
+          width: 200rpx;
+          overflow: hidden; /*  溢出隐藏   */
+          text-overflow: ellipsis; /*显示省略号*/
+          white-space: nowrap; /*不换行*/
+        }
+        .r_center_2 {
+          text-align: right;
+          margin-right: 10rpx;
+        }
+      }
+      .r_center1 {
+        display: flex;
+        font-size: 20rpx;
+        flex-wrap: wrap;
+        .r_view {
+          background: #eeeeee;
+          padding: 10rpx 15rpx;
+          margin-left: 15rpx;
+          margin-top: 10rpx;
+        }
+        .r_center1 .r_view:nth-child(1) {
+          margin-left: 0;
+        }
+      }
+    }
+  }
+  .r_center12 {
+    text {
+      color: #ee3e3e;
+      font-size: 22rpx;
+    }
+  }
+}
+</style>
+<template>
+  <view class="container">
+    <view class='posi'>
+      <swiper class='swiper-box' indicator-dots="{{indicatorDots}}" autoplay="{{autoplay}}" interval="{{interval}}" duration="{{duration}}" circular="{{circular}}">
+        <block wx:for="{{imgUrls}}" wx:key="">
+          <swiper-item>
+            <image src="{{item.cover}}"></image>
+          </swiper-item>
+        </block>
+      </swiper>
+      <view class='header'>
+        <view class="place" @tap="toCity">
+          <image src='/images/icon_dingwei.png'></image>
+          <text>{{message}}</text>
+        </view>
+      </view>
+    </view>
+    <view @tap="toArea" class='botton'>
+      <button>查看铺源</button>
+    </view>
+    <view class='choice'>
+      <view class='choice1'>
+        <view class='choice1_1'>推荐房源</view>
+      </view>
+      <block wx:for="{{storeList}}" wx:key="">
+        <view @tap="toDetail({{item.id}})" class='choice_box'>
+          <view class='sole_buju'>
+            <view class='sole_img'>
+              <image src='{{item.img}}' mode='aspectFill' />
+            </view>
+            <view class='sole_right'>
+              <view class='r_top'>
+                <view class='r_top1'>
+                  <text>{{item.title}}</text>
+                </view>
+                <view class='r_top3'>
+                  <text>{{item.min_area}}-{{item.max_area}}m²</text>
+                </view>
+              </view>
+              <view class='r_center'>
+                <view class='r_center11 '>
+                  <text>{{item.advantage}}</text>
+                </view>
+                <view class='r_center_2'>销售均价</view>
+                <view class='r_center12'>
+                  <text>{{item.price}}/m²</text>
+                </view>
+              </view>
+              <view class='r_center1'>
+                <block wx:for="{{item.tags}}" wx:key="" wx:for-item="subitem">
+                  <view class='r_view'>
+                    <text>{{subitem.name}}</text>
+                  </view>
+                </block>
+              </view>
+            </view>
+          </view>
+        </view>
+      </block>
+    </view>
+  </view>
+  <!-- 城市 -->
+  <view class="modelCity" hidden="{{!isShowCity}}">
+    <view class="buydes-dialog-container-bottom">
+      <text class='opencity'>已开通城市</text>
+      <view class='city'>
+        <block wx:for="{{cityList}}" wx:key="" data-city_id="item.city_id">
+          <view @tap="citys({{item.city_id}},{{item.city_name}})">
+            <text>{{item.city_name}}</text>
+          </view>
+        </block>
+      </view>
+    </view>
+  </view>
+  <view class="mask" hidden="{{!isShowMask}}"></view>
+<view class="pull iconfont icon-xiao">上拉加载更多!</view>
+</template>
+
+<script>
+import wepy from 'wepy'
+var method = require('../utils/method.js')
+export default class Index extends wepy.page {
+  config = {
+    navigationBarTitleText: '买铺精灵'
+  }
+  data = {
+    imgUrls: [],
+    indicatorDots: true,
+    autoplay: true,
+    interval: 3000,
+    duration: 1000,
+    circular: true,
+    isShowMask: false,
+    isShowCity: false,
+    cityList: [],
+    message: '深圳市',
+    cityId: '440300',
+    storeList: [],
+    rows: 10, //每页的条数
+    page: 1 //当前页数
+  }
+  onLoad() {
+    this.getBanner()
+    this.getStore()
+  }
+  methods = {
+    toArea() {
+      wx.navigateTo({
+        url: '/pages/area'
+      })
+    },
+    toCity() {
+      this.isShowMask = true
+      this.isShowCity = true
+      method.request({
+        url: 'api/v1/opened/city',
+        success: res => {
+          this.cityList = res.data.data
+          this.$apply()
+        }
+      })
+    },
+    citys(city_id, city_name) {
+      method.request({
+        url: 'api/v1/small/banner',
+        method: 'GET',
+        data: {
+          cityId: city_id
+        },
+        success: res => {
+          this.imgUrls = res.data.data
+          this.$apply()
+        }
+      }),
+        method.request({
+          url: 'api/v1/small/invest',
+          method: 'GET',
+          data: {
+            cityId: city_id
+          },
+          success: res => {
+            this.storeList = res.data.data
+            this.$apply()
+          }
+        })
+      this.isShowMask = false
+      this.isShowCity = false
+      this.message = city_name
+    },
+    toDetail(id) {
+      wx.navigateTo({
+        url: `/pages/investment?id=${id}`
+      })
+    }
+  }
+  getBanner() {
+    method.request({
+      url: 'api/v1/small/banner',
+      method: 'GET',
+      data: {
+        cityId: this.cityId
+      },
+      success: res => {
+        this.imgUrls = res.data.data
+        this.$apply()
+      }
+    })
+  }
+  getStore() {
+    method.request({
+      url: 'api/v1/small/invest',
+      method: 'GET',
+      data: {
+        cityId: this.cityId,
+        rows:this.rows,
+        page:this.page
+      },
+      success: res => {
+          if (res.data.msg === '没有数据啦!') {
+          wx.showToast({
+            title: '没有数据了!',
+            icon: 'none',
+            duration: 1500,
+            mask: false
+          })
+          wx.hideNavigationBarLoading()
+          return
+        }
+        var storeList = res.data.data //第一页
+        var oldstoreList = this.storeList
+        for (var i = 0; i < storeList.length; i++) {
+          oldstoreList.push(storeList[i])
+        }
+        this.storeList = oldstoreList
+        this.$apply()
+      }
+    })
+  }
+  //上拉触底
+  onReachBottom() {
+   wx.showNavigationBarLoading()
+    this.page += 1
+    this.getStore()
+  }
+}
+</script>

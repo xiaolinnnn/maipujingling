@@ -1,0 +1,80 @@
+
+<template>
+  <view class='header'>
+    <view class='success'>
+      <image src='./images/icon_right.png' mode='widthFix' />
+    </view>
+    <text class="data">资料上传成功，我们将会审核您所提供的资料，并会通过电话，与您取得联系，在线下核实您的身份。</text>
+  </view>
+  <view @tap="ok" class="footer">
+    <view class="ok">好的</view>
+  </view>
+</template>
+
+<script>
+import wepy from 'wepy'
+export default class Attestation extends wepy.page {
+  config = {
+    navigationBarTitleText: '发布成功'
+  }
+
+  data = {}
+
+  components = {}
+
+  methods = {
+    ok() {
+      wx.switchTab({
+        url: '/pages/mine'
+      })
+    }
+  }
+
+  events = {}
+
+  watch = {}
+
+  computed = {}
+
+  onLoad() {}
+
+  onShow() {}
+}
+</script>
+
+<style lang='less'>
+.header {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  .success {
+    margin-top: 198rpx;
+    image {
+      width: 264rpx;
+      height: 141rpx;
+    }
+  }
+  .data {
+    color: #666;
+    font-size: 26rpx;
+    padding: 0 126rpx;
+    text-align: center;
+    margin-top: 67rpx;
+  }
+}
+.footer {
+  width: 420rpx;
+  height: 80rpx;
+  background: linear-gradient(0deg, rgba(0, 176, 214, 1), rgba(0, 214, 211, 1));
+  border-radius: 6px;
+  margin-top: 242rpx;
+  margin-left: 165rpx;
+  .ok {
+    font-size: 30rpx;
+    color: #fff;
+    text-align: center;
+    line-height: 80rpx;
+  }
+}
+</style>

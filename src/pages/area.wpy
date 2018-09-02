@@ -1,0 +1,471 @@
+<!--  -->
+<template>
+  <view class='wrapper'>
+    <view class='top1'>
+      <view class='top_img'>
+        <image src='/images/icon_place.png' mode='widthFix' />
+      </view>
+      <view @tap="showCity({{item.city_id}},{{item.city_name}})" class='top_ress'>{{message}}</view>
+    </view>
+    <view class="center">
+      <block wx:for="{{List}}" wx:key="">
+        <view class='top2'>
+          <view class='area'>{{item.name}}</view>
+          <view class='select' @tap="showModel({{index}},{{item.id}})">{{item.msg}}</view>
+        </view>
+      </block>
+    </view>
+  </view>
+  <button class="toList" @tap="toList">确定</button>
+  <!-- 区域 -->
+  <view class="modalFrame" hidden="{{!isShowArea}}">
+    <view class="top">
+      <scroll-view class="left base" scroll-y scroll-with-animation @scroll="">
+        <view>
+          <view class="total">全部</view>
+          <block wx:for="{{regionList}}" wx:key="">
+            <view @tap="select({{index}})" class="{{index==leftIndex?'active':''}}">{{item.name}}</view>
+          </block>
+        </view>
+      </scroll-view>
+      <scroll-view class="right base" scroll-y scroll-with-animation @scroll="">
+        <view class="right base">
+          <!-- <view class="total">不限</view> -->
+          <block wx:for="{{regionList[leftIndex].tArea}}" wx:key="">
+            <view @tap="chioce({{index}},{{item.name}})" class="{{index==rightIndex?'active':''}}">{{item.name}}</view>
+          </block>
+        </view>
+      </scroll-view>
+    </view>
+    <view class="bottom">
+      <view @tap="clear" class="clear botton">清除</view>
+      <view @tap="confirm" class="confirm botton">确定</view>
+    </view>
+  </view>
+  <!-- 面积 -->
+  <view class="modelAcreage" hidden="{{!isShowAcreage}}">
+    <view class="top">
+      <block wx:for="{{areaList}}" wx:key="">
+        <view @tap="selectItem({{index}},{{item.name}})" data-min_area="{{item.min_area}}" data-max_area="{{item.max_area}}" class="acreage fl {{areaIndex==index?'active':''}}">{{item.name}}</view>
+      </block>
+    </view>
+    <view class="bottom">
+      <view class="price">自定义面积</view>
+      <view class="count">
+        <view class="left">
+          <input @input="areaDown" class="down" placeholder-style="font-size:26rpx" value="{{areaDown}}" type="text" placeholder="下限">
+          </input>
+          <text class="to">至</text>
+          <input @input="areaUp" class="up" placeholder-style="font-size:26rpx" value="{{areaUp}}" type="text" placeholder="上限">
+          </input>
+        </view>
+        <view @tap="ensure" class="right">
+          <view class="ensure">确定</view>
+        </view>
+      </view>
+    </view>
+  </view>
+  <!-- 售价 -->
+  <view class="modelPrice" hidden="{{!isShowPrice}}">
+    <view class="top">
+      <block wx:for="{{priceList}}" wx:key="">
+        <view @tap="priceItem({{index}},{{item.name}})" data-min_price="{{item.min_price}}" data-max_price="{{item.max_price}}" class="cost fl {{priceIndex==index?'active':''}}">{{item.name}}</view>
+      </block>
+    </view>
+    <view class="bottom">
+      <view class="totalPrice">自定义总价范围(百万)</view>
+      <view class="count">
+        <view class="left">
+          <input @input="priceDown" class="down" placeholder-style="font-size:26rpx" value="{{priceDown}}" type="text" placeholder="总价下限/百万">
+          </input>
+          <text class="to">至</text>
+          <input @input="priceUp" class="up" placeholder-style="font-size:26rpx" value="{{priceUp}}" type="text" placeholder="总价上限/百万">
+          </input>
+        </view>
+      </view>
+      <view class="button">
+        <view @tap="reset" class="reset">重置</view>
+        <view @tap="ascertain" class="ascertain">确定</view>
+      </view>
+    </view>
+  </view>
+  <!-- 城市 -->
+  <view class="modelCity" hidden="{{!isShowCity}}">
+    <view class="buydes-dialog-container-bottom">
+      <text class='opencity'>已开通城市</text>
+      <view class='city'>
+        <block wx:for="{{cityList}}" wx:key="">
+          <view>
+            <text @tap="citys({{item.city_id}},{{item.city_name}})">{{item.city_name}}</text>
+          </view>
+        </block>
+      </view>
+    </view>
+  </view>
+  <!-- 遮罩 -->
+  <view class="mask" hidden="{{!isShowMask}}"></view>
+
+</template>
+
+<script>
+import wepy from 'wepy'
+var method = require('../utils/method.js')
+export default class Area extends wepy.page {
+  config = {
+    navigationBarTitleText: '买铺精灵'
+  }
+
+  data = {
+    List: [
+      { id: 1, name: '区域', msg: '请选择' },
+      { id: 2, name: '面积', msg: '请选择' },
+      { id: 3, name: '售价', msg: '请选择' }
+    ],
+    areaList: [
+      { name: '不限', min_area: 0, max_area: 0 },
+      { name: '20m²以下', min_area: 0, max_area: 20 },
+      { name: '20m²-50m²', min_area: 20, max_area: 50 },
+      { name: '50m²-100m²', min_area: 50, max_area: 100 },
+      { name: '100m²-200m²', min_area: 100, max_area: 200 },
+      { name: '200m²-500m²', min_area: 200, max_area: 500 },
+      { name: '500m²以上', min_area: 500, max_area: 0 }
+    ],
+    priceList: [
+      { name: '50万以下', min_price: 0, max_price: 50 },
+      { name: '50-100万', min_price: 50, max_price: 100 },
+      { name: '100-200万', min_price: 100, max_price: 200 },
+      { name: '200-300万', min_price: 200, max_price: 300 },
+      { name: '300-400万', min_price: 300, max_price: 400 },
+      { name: '400万以上', min_price: 400, max_price: 0 }
+    ],
+    message: '深圳',
+    isShowMask: false, //遮罩
+    isShowArea: false, //区域
+    isShowAcreage: false, //面积
+    isShowPrice: false, //价格
+    isShowCity: false, //顶部城市
+    cityList: [], //城市列表
+    regionList: [], //区域列表
+    leftIndex: 0, //区域左边索引
+    rightIndex: undefined, //区域右边索引
+    areaIndex: undefined, //面积索引
+    priceIndex: undefined, //价格索引
+    areaDown: '', //自定义面积下限
+    areaUp: '', //自定义面积上限
+    priceDown: '', //总价下限
+    priceUp: '', //总价上限
+    twoArea: '', //二级区域
+    regionName: '', //区域名字
+    acreageName: '', //面积名字
+    priceName: '', //价格名字
+    cityId: 440300, //城市id
+    min_area: '', //最小面积
+    max_area: '', //最大面积
+    min_price: '', //最低价格
+    max_price: '', //最高价格
+    a_id: '' //区域id
+  }
+
+  components = {}
+
+  methods = {
+    showModel(index, id) {
+      if (index === 0) {
+        this.rightIndex = -1
+        method.request({
+          url: 'api/v1/area',
+          method: 'post',
+          data: { cityId: this.cityId },
+          success: res => {
+            this.regionList = res.data.data
+            this.$apply()
+          }
+        })
+        this.isShowArea = true
+        this.isShowMask = true
+      } else if (index === 1) {
+        this.areaIndex = -1
+        this.isShowAcreage = true
+        this.isShowMask = true
+      } else {
+        this.areaIndex = -1
+        this.isShowPrice = true
+        this.isShowMask = true
+      }
+    },
+    select(index) {
+      this.leftIndex = index
+      this.rightIndex = -1
+    },
+    chioce(index, name) {
+      this.regionName = name
+      this.rightIndex = index
+    },
+    // 区域
+    clear() {
+      this.isShowArea = false
+      this.isShowMask = false
+    },
+    confirm() {
+      this.regionList.forEach((item, index) => {
+        // console.log(index)
+        if (index === this.leftIndex) {
+          this.a_id = item.id
+        }
+      })
+      if (this.regionName) {
+        this.List.forEach(item => {
+          if (item.id === 1) {
+            item.msg = this.regionName
+          }
+        })
+      } else {
+        wx.showToast({
+          title: '请选择商圈',
+          icon: 'none',
+          duration: 1500,
+          mask: false
+        })
+        return
+      }
+      this.isShowArea = false
+      this.isShowMask = false
+    },
+    // 面积
+    ensure() {
+      this.areaIndex = -1
+      if (this.areaDown > this.areaUp) {
+        wx.showToast({
+          title: '请重新输入',
+          icon: 'none',
+          duration: 1500,
+          mask: false
+        })
+        return
+      }
+      if (this.areaDown || this.areaUp) {
+        this.min_area = parseInt(this.areaDown)
+        this.max_area = parseInt(this.areaUp)
+        this.List.forEach(item => {
+          if (item.id === 2) {
+            item.msg = this.areaDown + 'm²-' + this.areaUp + 'm²'
+            this.areaDown = ''
+            this.areaUp = ''
+          }
+        })
+      } else if (this.acreageName) {
+        this.List.forEach(item => {
+          if (item.id === 2) {
+            item.msg = this.acreageName
+          }
+        })
+      } else {
+        wx.showToast({
+          title: '请选择面积',
+          icon: 'none',
+          duration: 1500,
+          mask: false
+        })
+        return
+      }
+      this.isShowAcreage = false
+      this.isShowMask = false
+    },
+    selectItem(index, name, e) {
+      this.min_area = e.currentTarget.dataset.min_area
+      this.max_area = e.currentTarget.dataset.max_area
+      this.acreageName = name
+      this.areaIndex = index
+    },
+    // 售价
+    ascertain() {
+      this.priceIndex = -1
+      if (this.priceDown > this.priceUp) {
+        wx.showToast({
+          title: '请重新输入',
+          icon: 'none',
+          duration: 1500,
+          mask: false
+        })
+        return
+      }
+      if (this.priceDown || this.priceUp) {
+        this.min_price = parseInt(this.priceDown)
+        this.max_price = parseInt(this.priceUp)
+        this.List.forEach(item => {
+          if (item.id === 3) {
+            item.msg = this.priceDown + '-' + this.priceUp + '万'
+            this.priceDown = ''
+            this.priceUp = ''
+          }
+        })
+      } else if (this.priceName) {
+        this.List.forEach(item => {
+          if (item.id === 3) {
+            item.msg = this.priceName
+          }
+        })
+      } else {
+        wx.showToast({
+          title: '请选择价格',
+          icon: 'none',
+          duration: 1500,
+          mask: false
+        })
+        return
+      }
+      this.isShowPrice = false
+      this.isShowMask = false
+    },
+    reset() {
+      this.priceDown = ''
+      this.priceUp = ''
+      this.priceIndex = -1
+    },
+    priceItem(index, name, e) {
+      this.min_price = e.currentTarget.dataset.min_price
+      this.max_price = e.currentTarget.dataset.max_price
+      this.priceName = name
+      this.priceIndex = index
+    },
+    // 城市
+    showCity() {
+      method.request({
+        url: 'api/v1/opened/city',
+        success: res => {
+          this.cityList = res.data.data
+          this.$apply()
+        }
+      })
+      this.isShowCity = true
+      this.isShowMask = true
+    },
+    // 自定义面积下限
+    areaDown(e) {
+      this.areaDown = e.detail.value
+    },
+    // 自定义面积上限
+    areaUp(e) {
+      this.areaUp = e.detail.value
+    },
+    //总价上限
+    priceDown(e) {
+      this.priceDown = e.detail.value
+    },
+    //总价下限
+    priceUp(e) {
+      this.priceUp = e.detail.value
+    },
+    // 点击切换城市
+    citys(city_id, city_name) {
+      // console.log(city_id)
+      this.cityId = city_id
+      method.request({
+        url: 'api/v1/area',
+        method: 'post',
+        data: { cityId: this.cityId },
+        success: res => {
+          this.regionList = res.data.data
+          this.$apply()
+        }
+      })
+      this.isShowCity = false
+      this.isShowMask = false
+      this.message = city_name
+    },
+    toList() {
+      var storeSearch = {
+        cityId: this.cityId,
+        a_id: this.a_id,
+        trading_area: this.regionName,
+        min_area: this.min_area,
+        max_area: this.max_area,
+        min_price: this.min_price,
+        max_price: this.max_price
+      }
+      wx.setStorage({
+        key: 'search',
+        data: storeSearch
+      })
+      wx.navigateTo({
+        url: '/pages/source'
+      })
+    }
+  }
+
+  events = {}
+
+  watch = {}
+
+  computed = {}
+
+  onLoad() {}
+
+  onShow() {}
+}
+</script>
+
+<style lang='less'>
+// 头部
+.wrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  color: #999999;
+  .top1 {
+    margin: 0 auto;
+    display: flex;
+    .top_img {
+      width: 26rpx;
+      height: 30rpx;
+      margin-top: 30rpx;
+      image {
+        width: 26rpx;
+        height: 30rpx;
+      }
+    }
+    .top_ress {
+      font-size: 30rpx;
+      margin-top: 32rpx;
+      margin-left: 9rpx;
+    }
+  }
+  .center {
+    margin-top: 61rpx;
+    .top2 {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1rpx solid #ddd;
+      padding: 0 54rpx;
+      box-sizing: border-box;
+      height: 86rpx;
+      .area {
+        font-size: 30rpx;
+      }
+      .select {
+        font-size: 26rpx;
+      }
+    }
+  }
+}
+.toList {
+  width: 300rpx;
+  height: 80rpx;
+  background-color: #00b4d7;
+  line-height: 80rpx;
+  font-size: 30rpx;
+  text-align: center;
+  color: #fff;
+  margin-top: 80rpx;
+  border-radius: 10rpx;
+}
+// 遮罩
+.mask {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  top: 0px;
+  background: rgba(0, 0, 0, 0.4);
+}
+</style>
