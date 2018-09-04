@@ -44,7 +44,8 @@ export default class Wallet extends wepy.page {
 
   data = {
     walletList: [],
-    date: ''
+    date: '',
+    token: ''
   }
 
   components = {}
@@ -58,17 +59,22 @@ export default class Wallet extends wepy.page {
   computed = {}
 
   onLoad() {
-    const token = wx.getStorageSync('token')
-    method.request({
-      url: 'api/v1/user/wallet',
-      method: 'GET',
-      data: { token },
+    wx.getStorage({
+      key: 'userInfo',
       success: res => {
-        res.data.data.runningWater.forEach(item => {
-          item.time = date.formatTime(item.created_at, 'Y-M-D')
+        this.token = res.data.token
+        method.request({
+          url: 'api/v1/user/wallet',
+          method: 'GET',
+          data: { token: this.token },
+          success: res => {
+            res.data.data.runningWater.forEach(item => {
+              item.time = date.formatTime(item.created_at, 'Y-M-D')
+            })
+            this.walletList = res.data.data
+            this.$apply()
+          }
         })
-        this.walletList = res.data.data
-        this.$apply()
       }
     })
   }

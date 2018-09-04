@@ -17,7 +17,8 @@
   <!-- 头部 -->
   <view class='mine_top1' wx:if="{{isShowPerson}}">
     <view class='tips'>请先登录</view>
-    <view class="login" @tap="toLogin">登录/注册</view>
+    <view class="login1" @tap="toLogin">登录/注册</view>
+
   </view>
 
   <view @tap="toAttention" class="list one">
@@ -86,8 +87,7 @@ export default class Mine extends wepy.page {
   data = {
     isShowPhone: true,
     isShowPerson: true,
-    userInfo: [],
-    token: ''
+    userInfo: []
   }
 
   components = {}
@@ -116,27 +116,27 @@ export default class Mine extends wepy.page {
     // 我的关注
     toAttention() {
       if (this.isShowPerson === false) {
-      wx.navigateTo({
-        url: '/pages/attention'
-      })
+        wx.navigateTo({
+          url: '/pages/attention'
+        })
       } else {
-      //没有登陆 提示登陆
-      wx.showModal({
-        title: '提示',
-        content: '要登录进去哦',
-        showCancel: true,
-        cancelText: '残忍拒绝',
-        cancelColor: '#000000',
-        confirmText: '去登陆',
-        confirmColor: '#00B4D7',
-        success: res => {
-          if (res.confirm) {
-            wx.redirectTo({
-              url: '/pages/login'
-            })
+        //没有登陆 提示登陆
+        wx.showModal({
+          title: '提示',
+          content: '要登录进去哦',
+          showCancel: true,
+          cancelText: '残忍拒绝',
+          cancelColor: '#000000',
+          confirmText: '去登陆',
+          confirmColor: '#00B4D7',
+          success: res => {
+            if (res.confirm) {
+              wx.redirectTo({
+                url: '/pages/login'
+              })
+            }
           }
-        }
-      })
+        })
       }
     },
     // 经纪人验证
@@ -227,27 +227,14 @@ export default class Mine extends wepy.page {
 
   onLoad() {}
   onShow() {
-    var Info = wx.getStorageSync('userInfo')
-    if (Info) {
-      method.request({
-        url: 'api/v1/user/bindInfo',
-        method: 'post',
-        data: {
-          mobile: Info.mobile,
-          openid: Info.openid,
-          avatar: Info.avatar,
-          nickname: Info.nickname,
-          captcha: Info.captcha
-        },
-        success: res => {
-          this.token = res.data.data.userInfo.token
-          this.userInfo = res.data.data.userInfo
-          this.isShowPerson = false
-          wx.setStorageSync('token', this.token)
-          this.$apply()
-        }
-      })
-    }
+    wx.getStorage({
+      key: 'userInfo',
+      success: res => {
+        this.userInfo = res.data
+        this.isShowPerson = false
+        this.$apply()
+      }
+    })
   }
 }
 </script>
@@ -266,7 +253,7 @@ export default class Mine extends wepy.page {
     color: #fff;
     margin-top: 70rpx;
   }
-  .login {
+  .login1 {
     width: 266rpx;
     height: 67rpx;
     background: rgba(255, 255, 255, 1);

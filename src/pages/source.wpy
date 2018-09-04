@@ -1,137 +1,139 @@
 <!--  -->
 <template>
-  <view class='container'>
-    <view class='header'>
-      <block wx:for="{{tabs}}" wx:key="">
-        <view class='li' @tap="showModel({{index}})">
-          <view class='san_img'>{{item.name}}
-            <image src='{{item.img}}' mode='aspectFit' />
+  <view class='hidden'>
+    <view class='container'>
+      <view class='header'>
+        <block wx:for="{{tabs}}" wx:key="">
+          <view class='li' @tap="showModel({{index}})">
+            <view class='san_img'>{{item.name}}
+              <image src='{{item.img}}' mode='aspectFit' />
+            </view>
           </view>
-        </view>
-      </block>
-    </view>
-    <view class='list_li'>
-      <block wx:for="{{specific}}" wx:for-index="index" wx:key="item.id">
-        <view hidden="{{!item.value}}" class='li_li'>{{item.value}}
-          <view class='posi_img' @tap="remove({{item.id}})">
-            <text class="iconfont icon-shanchu"></text>
+        </block>
+      </view>
+      <view class='list_li'>
+        <block wx:for="{{specific}}" wx:for-index="index" wx:key="item.id">
+          <view hidden="{{!item.value}}" class='li_li'>{{item.value}}
+            <view class='posi_img' @tap="remove({{item.id}})">
+              <text class="iconfont icon-shanchu"></text>
+            </view>
           </view>
-        </view>
-      </block>
+        </block>
 
-    </view>
-    <view class='choice'>
-      <block wx:for="{{storeList}}" wx:key="">
-        <view @tap="toDetail({{item.id}})" class='choice_box sole_box'>
-          <view class='sole_buju'>
-            <view class='sole_img'>
-              <image src='{{item.img}}' />
-            </view>
-            <view class='sole_right'>
-              <view class='r_top'>
-                <view class='r_top1'>
-                  <text>{{item.title}}</text>
-                </view>
-                <view class='r_top3'>
-                  <text>{{item.min_area}}-{{item.max_area}}m²</text>
-                </view>
+      </view>
+      <view class='choice'>
+        <block wx:for="{{storeList}}" wx:key="">
+          <view @tap="toDetail({{item.id}})" class='choice_box sole_box'>
+            <view class='sole_buju'>
+              <view class='sole_img'>
+                <image src='{{item.img}}' />
               </view>
-              <view class='r_center'>
-                <view class='r_center11'>
-                  <text>{{item.advantage}}</text>
-                </view>
-                <view class='r_center_2'>销售均价</view>
-                <view class='r_center12'>
-                  <text>{{item.price}}/m²</text>
-                </view>
-              </view>
-              <view class='r_center1'>
-                <block wx:for="{{item.tags}}" wx:key="" wx:for-item="subitem">
-                  <view class='r_view'>
-                    <text>{{subitem.name}}</text>
+              <view class='sole_right'>
+                <view class='r_top'>
+                  <view class='r_top1'>
+                    <text>{{item.title}}</text>
                   </view>
-                </block>
+                  <view class='r_top3'>
+                    <text>{{item.min_area}}-{{item.max_area}}m²</text>
+                  </view>
+                </view>
+                <view class='r_center'>
+                  <view class='r_center11'>
+                    <text>{{item.advantage}}</text>
+                  </view>
+                  <view class='r_center_2'>销售均价</view>
+                  <view class='r_center12'>
+                    <text>{{item.price}}/m²</text>
+                  </view>
+                </view>
+                <view class='r_center1'>
+                  <block wx:for="{{item.tags}}" wx:key="" wx:for-item="subitem">
+                    <view class='r_view'>
+                      <text>{{subitem.name}}</text>
+                    </view>
+                  </block>
+                </view>
               </view>
             </view>
           </view>
-        </view>
-      </block>
+        </block>
+      </view>
     </view>
-  </view>
-  <!-- 区域 -->
-  <view class="modalFrame" hidden="{{!isShowArea}}">
-    <view class="roof">
-      <scroll-view class="left base" scroll-y scroll-with-animation @scroll="">
-        <view>
-          <view class="total">全部</view>
-          <block wx:for="{{regionList}}" wx:key="">
-            <view @tap="select({{index}},{{item.name}})" class="{{index==leftIndex?'active':''}}">{{item.name}}</view>
-          </block>
-        </view>
-      </scroll-view>
-      <scroll-view class="right base" scroll-y scroll-with-animation @scroll="">
-        <view>
-          <block wx:for="{{regionList[leftIndex].tArea}}" wx:key="item.cityId">
-            <view @tap="chioce({{index}},{{item.name}})" class="{{index==rightIndex?'active':''}}">{{item.name}}</view>
-          </block>
-        </view>
-      </scroll-view>
+    <!-- 区域 -->
+    <view class="modalFrame" hidden="{{!isShowArea}}">
+      <view class="roof">
+        <scroll-view class="left base" scroll-y scroll-with-animation @scroll="">
+          <view>
+            <view class="total">全部</view>
+            <block wx:for="{{regionList}}" wx:key="">
+              <view @tap="select({{index}},{{item.name}})" class="{{index==leftIndex?'active':''}}">{{item.name}}</view>
+            </block>
+          </view>
+        </scroll-view>
+        <scroll-view class="right base" scroll-y scroll-with-animation @scroll="">
+          <view>
+            <block wx:for="{{regionList[leftIndex].tArea}}" wx:key="item.cityId">
+              <view @tap="chioce({{index}},{{item.name}})" class="{{index==rightIndex?'active':''}}">{{item.name}}</view>
+            </block>
+          </view>
+        </scroll-view>
+      </view>
+      <view class="bottom">
+        <view @tap="clear" class="clear botton">清除</view>
+        <view @tap="confirm" class="confirm botton">确定</view>
+      </view>
     </view>
-    <view class="bottom">
-      <view @tap="clear" class="clear botton">清除</view>
-      <view @tap="confirm" class="confirm botton">确定</view>
-    </view>
-  </view>
-  <!-- 面积 -->
-  <view class="modelAcreage" hidden="{{!isShowAcreage}}">
-    <view class="top">
-      <block wx:for="{{areaList}}" wx:key="">
-        <view @tap="selectItem({{index}},{{item.name}})" data-min_area="{{item.min_area}}" data-max_area="{{item.max_area}}" class="head {{areaIndex==index?'active':''}}">{{item.name}}</view>
-      </block>
-    </view>
-    <view class="bottom">
-      <view class="price">自定义面积</view>
-      <view class="count">
-        <view class="left">
-          <input @input="areaDown" class="down" placeholder-style="font-size:26rpx" value="{{areaDown}}" type="text" placeholder="下限">
-          </input>
-          <text class="to">至</text>
-          <input @input="areaUp" class="up" placeholder-style="font-size:26rpx" value="{{areaUp}}" type="text" placeholder="上限">
-          </input>
-        </view>
-        <view @tap="ensure" class="right">
-          <view class="ensure">确定</view>
+    <!-- 面积 -->
+    <view class="modelAcreage" hidden="{{!isShowAcreage}}">
+      <view class="top">
+        <block wx:for="{{areaList}}" wx:key="">
+          <view @tap="selectItem({{index}},{{item.name}})" data-min_area="{{item.min_area}}" data-max_area="{{item.max_area}}" class="head {{areaIndex==index?'active':''}}">{{item.name}}</view>
+        </block>
+      </view>
+      <view class="bottom">
+        <view class="price">自定义面积</view>
+        <view class="count">
+          <view class="left">
+            <input @input="areaDown" class="down" placeholder-style="font-size:26rpx" value="{{areaDown}}" type="text" placeholder="下限">
+            </input>
+            <text class="to">至</text>
+            <input @input="areaUp" class="up" placeholder-style="font-size:26rpx" value="{{areaUp}}" type="text" placeholder="上限">
+            </input>
+          </view>
+          <view @tap="ensure" class="right">
+            <view class="ensure">确定</view>
+          </view>
         </view>
       </view>
     </view>
-  </view>
-  <!-- 售价 -->
-  <view class="modelPrice" hidden="{{!isShowPrice}}">
-    <view class="top">
-      <block wx:for="{{priceList}}" wx:key="">
-        <view @tap="priceItem({{index}},{{item.name}})" data-min_price="{{item.min_price}}" data-max_price="{{item.max_price}}" class="head {{priceIndex==index?'active':''}}">{{item.name}}
-        </view>
-      </block>
-    </view>
-    <view class="bottom">
-      <view class="totalPrice">自定义总价范围(百万)</view>
-      <view class="count">
-        <view class="left">
-          <input @input="priceDown" class="down" placeholder-style="font-size:26rpx" value="{{priceDown}}" type="text" placeholder="总价下限/百万">
-          </input>
-          <text class="to">至</text>
-          <input @input="priceUp" class="up" placeholder-style="font-size:26rpx" value="{{priceUp}}" type="text" placeholder="总价上限/百万">
-          </input>
-        </view>
+    <!-- 售价 -->
+    <view class="modelPrice" hidden="{{!isShowPrice}}">
+      <view class="top">
+        <block wx:for="{{priceList}}" wx:key="">
+          <view @tap="priceItem({{index}},{{item.name}})" data-min_price="{{item.min_price}}" data-max_price="{{item.max_price}}" class="head {{priceIndex==index?'active':''}}">{{item.name}}
+          </view>
+        </block>
       </view>
-      <view class="button">
-        <view @tap="reset" class="reset">重置</view>
-        <view @tap="ascertain" class="ascertain">确定</view>
+      <view class="bottom">
+        <view class="totalPrice">自定义总价范围(百万)</view>
+        <view class="count">
+          <view class="left">
+            <input @input="priceDown" class="down" placeholder-style="font-size:26rpx" value="{{priceDown}}" type="text" placeholder="总价下限/百万">
+            </input>
+            <text class="to">至</text>
+            <input @input="priceUp" class="up" placeholder-style="font-size:26rpx" value="{{priceUp}}" type="text" placeholder="总价上限/百万">
+            </input>
+          </view>
+        </view>
+        <view class="button">
+          <view @tap="reset" class="reset">重置</view>
+          <view @tap="ascertain" class="ascertain">确定</view>
+        </view>
       </view>
     </view>
   </view>
   <!-- 遮罩 -->
-  <view class="mask" hidden="{{!isShowMask}}"></view>
+  <view class="mask" catchtouchmove="preventD" hidden="{{!isShowMask}}"></view>
   <!-- <view class="pull iconfont icon-xiao">上拉加载更多!</view> -->
 </template>
 
@@ -215,6 +217,7 @@ export default class Source extends wepy.page {
   components = {}
 
   methods = {
+    preventD() {},
     remove(activeId) {
       let source = wx.getStorageSync('search')
       this.specific.forEach(item => {
@@ -242,7 +245,7 @@ export default class Source extends wepy.page {
       })
     },
     // 点击上面导航栏
-    showModel(index) {
+    showModel(index, e) {
       if (index === 0) {
         this.leftIndex = 0
         this.rightIndex = -1
@@ -524,7 +527,7 @@ export default class Source extends wepy.page {
 
 <style lang='less'>
 page {
-  height: 1300rpx;
+  height: 1600rpx;
 }
 .header {
   height: 80rpx;
@@ -647,10 +650,12 @@ page {
 }
 
 .modelPrice {
+  z-index: 500;
   top: 80rpx;
 }
 .modelAcreage {
   top: 80rpx;
+  z-index: 999;
 }
 .top {
   padding: 20rpx 30rpx;
@@ -670,6 +675,8 @@ page {
   }
 }
 .modalFrame {
+  //  position: fixed;
+  z-index: 555;
   top: 80rpx;
   .roof {
     height: 560rpx;
@@ -698,4 +705,5 @@ page {
     }
   }
 }
+
 </style>

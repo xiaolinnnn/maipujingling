@@ -24,9 +24,9 @@ export default class Attestation extends wepy.page {
 
   methods = {
     ok() {
-      wx.switchTab({
-        url: '/pages/mine'
-      })
+     wx.switchTab({
+       url: '/pages/mine'
+     });
     }
   }
 

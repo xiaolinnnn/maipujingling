@@ -62,7 +62,8 @@ export default class Attention extends wepy.page {
     shopList: [],
     rows: 10, //每页的条数
     page: 1, //当前页数
-    isShow: true
+    isShow: true,
+    token: ''
   }
 
   components = {}
@@ -92,35 +93,41 @@ export default class Attention extends wepy.page {
 
   onShow() {}
   getData() {
-    var token = wx.getStorageSync('token')
-    method.request({
-      url: 'api/v1/store/call/list',
-      method: 'GET',
-      data: {
-        token,
-        rows: this.rows,
-        page: this.page,
-        type: 'invest'
-      },
+    wx.getStorage({
+      key: 'userInfo',
       success: res => {
-        if (res.data.msg === '没有数据啦!') {
-          wx.showToast({
-            title: '没有数据了!',
-            icon: 'none',
-            duration: 1500,
-            mask: false
-          })
-          wx.hideNavigationBarLoading()
-          return
-        }
-        var shopList = res.data.data //第一页
-        var oldShopList = this.shopList
-        for (var i = 0; i < shopList.length; i++) {
-          oldShopList.push(shopList[i])
-        }
-        wx.stopPullDownRefresh()
-        this.shopList = oldShopList
-        this.$apply()
+        this.token = res.data.token
+        method.request({
+          url: 'api/v1/store/call/list',
+          method: 'GET',
+          data: {
+            token: this.token,
+            rows: this.rows,
+            page: this.page,
+            type: 'invest'
+          },
+          success: res => {
+            wx.stopPullDownRefresh()
+            if (res.data.msg === '没有数据啦!') {
+              wx.showToast({
+                title: '没有数据了!',
+                icon: 'none',
+                duration: 1500,
+                mask: false
+              })
+            }
+            wx.hideNavigationBarLoading()
+            if (!!res.data.data) {
+              var shopList = res.data.data //第一页
+              var oldShopList = this.shopList
+              for (var i = 0; i < shopList.length; i++) {
+                oldShopList.push(shopList[i])
+              }
+              this.shopList = oldShopList
+              this.$apply()
+            }
+          }
+        })
       }
     })
   }
@@ -128,23 +135,8 @@ export default class Attention extends wepy.page {
   onPullDownRefresh() {
     wx.showNavigationBarLoading()
     this.page = 1
-    var token = wx.getStorageSync('token')
-    method.request({
-      url: 'api/v1/store/call/list',
-      method: 'GET',
-      data: {
-        token,
-        rows: this.rows,
-        page: this.page,
-        type: 'invest'
-      },
-      success: res => {
-        wx.hideNavigationBarLoading()
-        wx.stopPullDownRefresh()
-        this.shopList = res.data.data
-        this.$apply()
-      }
-    })
+    this.shopList = []
+    this.getData()
   }
   //上拉触底
   onReachBottom() {

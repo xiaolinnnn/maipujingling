@@ -134,7 +134,8 @@ export default class Investment extends wepy.page {
     id: '',
     detailList: [],
     imageUrl: [],
-    switchImage: false
+    switchImage: false,
+    token: ''
   }
 
   components = {}
@@ -156,52 +157,57 @@ export default class Investment extends wepy.page {
       })
     },
     collect() {
-      var token = wx.getStorageSync('token')
-      if (token) {
-        method.request({
-          url: 'api/v1/store/invest/call',
-          method: 'post',
-          data: {
-            token,
-            id: this.id
-          },
-          success: res => {
-            console.log(res)
-            if (res.data.msg === '收藏成功') {
-              this.switchImage = true
-              wx.showModal({
-                title: '收藏成功',
-                content: '是否要去收藏页面',
-                showCancel: true,
-                cancelText: '取消',
-                cancelColor: '#000000',
-                confirmText: '确定',
-                confirmColor: '#00B4D7',
-                success: res => {
-                  if (res.confirm) {
-                    wx.redirectTo({
-                      url: '/pages/attention'
-                    })
-                  }
+      wx.getStorage({
+        key: 'userInfo',
+        success: res => {
+          this.token = res.data.token
+          if (this.token) {
+            method.request({
+              url: 'api/v1/store/invest/call',
+              method: 'post',
+              data: {
+                token: this.token,
+                id: this.id
+              },
+              success: res => {
+                console.log(res)
+                if (res.data.msg === '收藏成功') {
+                  this.switchImage = true
+                  wx.showModal({
+                    title: '收藏成功',
+                    content: '是否要去收藏页面',
+                    showCancel: true,
+                    cancelText: '取消',
+                    cancelColor: '#000000',
+                    confirmText: '确定',
+                    confirmColor: '#00B4D7',
+                    success: res => {
+                      if (res.confirm) {
+                        wx.redirectTo({
+                          url: '/pages/attention'
+                        })
+                      }
+                    }
+                  })
+                } else {
+                  wx.showToast({
+                    title: '取消收藏成功',
+                    icon: 'none',
+                    duration: 1500,
+                    mask: false
+                  })
+                  this.switchImage = false
                 }
-              })
-            } else {
-              wx.showToast({
-                title: '取消收藏成功',
-                icon: 'none',
-                duration: 1500,
-                mask: false
-              })
-              this.switchImage = false
-            }
-            this.$apply()
+                 this.$apply()
+              }
+            })
+          } else {
+            wx.navigateTo({
+              url: '/pages/login'
+            })
           }
-        })
-      } else {
-        wx.navigateTo({
-          url: '/pages/login'
-        })
-      }
+        }
+      })
     },
     // 咨询
     consult() {
@@ -227,18 +233,16 @@ export default class Investment extends wepy.page {
 
   onLoad(option) {
     this.id = option.id
-    var token = wx.getStorageSync('token')
     method.request({
       url: 'api/v1/store/invest',
       method: 'GET',
       data: {
-        token,
         id: this.id
       },
       success: res => {
         res.data.data.is_call === 0
-          ? (this.switchImage = false)
-          : (this.switchImage = true)
+          ? (this.switchImage = true)
+          : (this.switchImage = false)
         this.detailList = res.data.data
         this.imageUrl.push(res.data.data.pic)
         this.$apply()

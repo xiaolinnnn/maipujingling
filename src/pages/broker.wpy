@@ -47,63 +47,99 @@ export default class Broker extends wepy.page {
     photo1: '',
     photo2: '',
     photo3: '',
-    token: '',
-    imgArr: [],
-    nameArr: ['business', 'id_card_z', 'id_card_f']
+    token: ''
   }
 
   components = {}
 
   methods = {
     upload() {
-      this.token = wx.getStorageSync('token')
-      // for (let i = 0; i < this.imgArr.length; i++) {
-      //   console.log(this.imgArr[i])
-      //   console.log(this.nameArr[i])
-      //   wx.uploadFile({
-      //     url: 'http://api.dgweidao.com/api/v1/agent/auth',
-      //     filePath: this.imgArr[i],
-      //     name: this.nameArr[i],
-      //     formData: {
-      //       token: this.token
-      //     },
-      //     success: res => {
-      //       console.log(res)
-      //     }
-      //   })
-      // }
-      wx.uploadFile({
-        url: 'http://api.dgweidao.com/api/v1/upload/singleImg',
-        filePath: this.photo1,
-        name: 'pic',
+      wx.getStorage({
+        key: 'userInfo',
         success: res => {
-          let url1 = JSON.parse(res.data).url
+          this.token = res.data.token
+          if (!this.photo1 || !this.photo2 || !this.photo3) {
+            wx.showToast({
+              title: '请上传证件照',
+              icon: 'none',
+              duration: 1500,
+              mask: false
+            })
+            return
+          }
+          wx.uploadFile({
+            url: 'http://api.dgweidao.com/api/v1/upload/singleImg',
+            filePath: this.photo1,
+            name: 'business',
+            formData: {
+              key: 'business'
+            },
+            success: res => {
+              wx.setStorage({
+                key: 'path1',
+                data: JSON.parse(res.data).url
+              })
+            }
+          })
+          wx.uploadFile({
+            url: 'http://api.dgweidao.com/api/v1/upload/singleImg',
+            filePath: this.photo2,
+            name: 'id_card_z',
+            formData: {
+              key: 'id_card_z'
+            },
+            success: res => {
+              wx.setStorage({
+                key: 'path2',
+                data: JSON.parse(res.data).url
+              })
+            }
+          })
+          wx.uploadFile({
+            url: 'http://api.dgweidao.com/api/v1/upload/singleImg',
+            filePath: this.photo3,
+            name: 'id_card_f',
+            formData: {
+              key: 'id_card_f'
+            },
+            success: res => {
+              wx.setStorage({
+                key: 'path3',
+                data: JSON.parse(res.data).url
+              })
+            }
+          })
+          let url1 = wx.getStorageSync('path1')
+          let url2 = wx.getStorageSync('path2')
+          let url3 = wx.getStorageSync('path3')
+          method.request({
+            url: 'api/v1/wx/agent/auth',
+            method: 'post',
+            data: {
+              token: this.token,
+              business: url1,
+              id_card_z: url2,
+              id_card_f: url3
+            },
+            success: res => {
+              console.log(res)
+
+              if (res.data.code === 200) {
+                wx.navigateTo({
+                  url: '/pages/attestation'
+                })
+              }
+              this.$apply()
+            }
+          })
         }
-      }),
-        wx.uploadFile({
-          url: 'http://api.dgweidao.com/api/v1/upload/singleImg',
-          filePath: this.photo2,
-          name: 'pic',
-          success: res => {
-            let url2 = JSON.parse(res.data).url
-          }
-        }),
-        wx.uploadFile({
-          url: 'http://api.dgweidao.com/api/v1/upload/singleImg',
-          filePath: this.photo3,
-          name: 'pic',
-          success: res => {
-            let url3 = JSON.parse(res.data).url
-          }
-        })
+      })
     },
     getPhoto1() {
       wx.chooseImage({
         count: 1,
         success: res => {
           this.photo1 = res.tempFilePaths[0]
-          // console.log(this.photo1)
-          this.imgArr.push(this.photo1)
           this.$apply()
         }
       })
@@ -113,7 +149,6 @@ export default class Broker extends wepy.page {
         count: 1,
         success: res => {
           this.photo2 = res.tempFilePaths[0]
-          this.imgArr.push(this.photo2)
           this.$apply()
         }
       })
@@ -123,7 +158,6 @@ export default class Broker extends wepy.page {
         count: 1,
         success: res => {
           this.photo3 = res.tempFilePaths[0]
-          this.imgArr.push(this.photo3)
           this.$apply()
         }
       })
