@@ -527,7 +527,7 @@ export default class Source extends wepy.page {
 
 <style lang='less'>
 page {
-  height: 1600rpx;
+  height: 1300rpx;
 }
 .header {
   height: 80rpx;

@@ -39,12 +39,12 @@
       <text class="iconfont icon-jiantouyou"></text>
     </view>
   </view>
-  <view @tap="toInviteBroker" class="list">
+  <button open-type="share" @tap="toInviteBroker" class="list broker">
     <view class="left">邀请经纪人</view>
     <view class="right">
       <text class="iconfont icon-jiantouyou"></text>
     </view>
-  </view>
+  </button>
   <view class="footer" @tap="phone">
     <view class="phone">客服电话</view>
   </view>
@@ -192,31 +192,7 @@ export default class Mine extends wepy.page {
       }
     },
     // 邀请经纪人
-    toInviteBroker() {
-      if (this.isShowPerson === false) {
-        wx.navigateTo({
-          url: '/pages/InviteBroker'
-        })
-      } else {
-        // 没有登陆 提示登陆
-        wx.showModal({
-          title: '提示',
-          content: '要登录进去哦',
-          showCancel: true,
-          cancelText: '残忍拒绝',
-          cancelColor: '#000000',
-          confirmText: '去登陆',
-          confirmColor: '#00B4D7',
-          success: res => {
-            if (res.confirm) {
-              wx.redirectTo({
-                url: '/pages/login'
-              })
-            }
-          }
-        })
-      }
-    }
+    toInviteBroker() {}
   }
 
   events = {}
@@ -235,6 +211,16 @@ export default class Mine extends wepy.page {
         this.$apply()
       }
     })
+  }
+  onShareAppMessage(opt) {
+    return {
+      title: '邀请您成为铺三代经纪人',
+      path: '/pages/InviteBroker',
+      imageUrl: './images/background.png',
+      success: res => {
+        console.log(res)
+      }
+    }
   }
 }
 </script>
@@ -323,6 +309,7 @@ export default class Mine extends wepy.page {
   border-bottom: 1rpx solid #ddd;
   padding: 0 25rpx;
   line-height: 109rpx;
+  background-color: #fff;
   .left {
     font-size: 30rpx;
   }
