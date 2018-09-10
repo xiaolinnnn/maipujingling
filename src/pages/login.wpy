@@ -1,14 +1,13 @@
 <template>
-  <view class='tel'>
-    <input @input="getMobile" type="number" placeholder='手机号' value="{{mobile}}" />
-    <text @tap="getCode" class="getCode">{{getCode}}</text>
+  <view class="centerLogin">
+    <view class="mobileNum">
+      <input class="mobileNumber" @input="getMobile" type="number" placeholder='手机号' value="{{mobile}}" />
+      <view catchtap="getCode" class="getCode">{{getCode}}</view>
+    </view>
+    <input class="verification" type="number" @input="code" value="{{code}}" placeholder='验证码' />
+    <view class="login">登录</view>
+    <button class="fake" open-type="getUserInfo" @tap="toPerson">登录</button>
   </view>
-  <view class='verification'><input type="number" @input="code" value="{{code}}" placeholder='验证码' /></view>
-
-  <view class='register'>
-    <button>登录</button>
-  </view>
-  <button class="login" open-type="getUserInfo" @tap="toPerson">登录</button>
   <view class='beijing'>
     <view class='line1'></view>
     <view class='tit'>
@@ -49,64 +48,61 @@ export default class Login extends wepy.page {
 
   methods = {
     getCode() {
-      if (!this.mobile.trim()) {
-        wx.showToast({
-          title: '请输入手机号',
-          icon: 'none',
-          duration: 1500,
-          mask: false
-        })
-        return
-      }
-      if (!this.isclick) {
-        return
-      }
-      let currentTime = this.currentTime
-      this.isclick = false
-      let interval = setInterval(() => {
-        currentTime--
-        this.getCode = currentTime + '秒'
-        if (currentTime <= 0) {
-          this.getCode = '重新发送'
-          // this.currentTime = 60
-          this.isclick = true
-          clearInterval(interval)
-          this.$apply()
-        }
-        this.$apply()
-      }, 1000)
-      let myreg = /^(((13[0-9]{1})|(15[0-9]{1})|(18[0-9]{1})|(17[0-9]{1}))+\d{8})$/
-      if (!myreg.test(this.mobile)) {
-        wx.showToast({
-          title: '手机号有误',
-          icon: 'none',
-          duration: 1500,
-          mask: false
-        })
-        return false
-      }
-      method.request({
-        url: 'api/v1/sendLoginSms',
-        method: 'post',
-        data: { mobile: this.mobile },
-        success: res => {
-          if (res.data.code === 200) {
-            wx.showToast({
-              title: '发送成功',
-              icon: 'none',
-              duration: 1500,
-              mask: false
-            })
-          } else {
-            wx.showToast({
-              title: '发送失败',
-              icon: 'none',
-              duration: 1500,
-              mask: false
-            })
-          }
-        }
-      })
+    wx.showToast({
+      title: "1111111111111",
+      icon: 'none',
+      duration: 1500,
+      mask: false,
+    });
+      // let myreg = /^(((13[0-9]{1})|(15[0-9]{1})|(18[0-9]{1})|(17[0-9]{1}))+\d{8})$/
+      // if (!myreg.test(this.mobile)) {
+      //   wx.showToast({
+      //     title: '手机号有误',
+      //     icon: 'none',
+      //     duration: 1500,
+      //     mask: false
+      //   })
+      //   return false
+      // }
+      // if (!this.isclick) {
+      //   return
+      // }
+      // let currentTime = this.currentTime
+      // this.isclick = false
+      // let interval = setInterval(() => {
+      //   currentTime--
+      //   this.getCode = currentTime + '秒'
+      //   if (currentTime <= 0) {
+      //     this.getCode = '重新发送'
+      //     // this.currentTime = 60
+      //     this.isclick = true
+      //     clearInterval(interval)
+      //     this.$apply()
+      //   }
+      //   this.$apply()
+      // }, 1000)
+      // method.request({
+      //   url: 'api/v1/sendLoginSms',
+      //   method: 'post',
+      //   data: { mobile: this.mobile },
+      //   success: res => {
+      //     if (res.data.code === 200) {
+      //       wx.showToast({
+      //         title: '发送成功',
+      //         icon: 'none',
+      //         duration: 1500,
+      //         mask: false
+      //       })
+      //     } else {
+      //       wx.showToast({
+      //         title: '发送失败',
+      //         icon: 'none',
+      //         duration: 1500,
+      //         mask: false
+      //       })
+      //     }
+      //   }
+      // })
     },
     // 获取手机号
     getMobile(e) {
@@ -117,70 +113,33 @@ export default class Login extends wepy.page {
       this.code = e.detail.value
     },
     toPerson() {
-      let myreg = /^(((13[0-9]{1})|(15[0-9]{1})|(18[0-9]{1})|(17[0-9]{1}))+\d{8})$/
-      if (!myreg.test(this.mobile)) {
+      if (!this.mobile.trim() || !this.mobile.trim()) {
         wx.showToast({
-          title: '手机号有误',
+          title: '请输入手机号或者验证码',
           icon: 'none',
           duration: 1500,
           mask: false
         })
-        return false
+        return
       }
-      if (!this.code.trim()) {
-        wx.showToast({
-          title: '请输入验证码',
-          icon: 'none',
-          duration: 1500,
-          mask: false
-        })
-      }
+
       wx.login({
         success: res => {
-          let code = res.code
-          let appId = 'wxa2933d6928dc3849'
-          let secret = '73e472a4bc52e295854c68113f9b712b'
-          wx.request({
-            url:
-              'https://api.weixin.qq.com/sns/jscode2session?appid=' +
-              appId +
-              '&secret=' +
-              secret +
-              '&js_code=' +
-              code +
-              '&grant_type=authorization_code',
-            method: 'GET',
-            header: {
-              'content-type': 'json'
-            },
+          wx.getUserInfo({
+            withCredentials: 'false',
+            lang: 'zh_CN',
             success: res => {
-              this.openid = res.data.openid
               method.request({
                 url: 'api/v1/user/login',
                 method: 'post',
                 data: { mobile: this.mobile, captcha: this.code },
                 success: res => {
-                  this.avatar = res.data.data.userInfo.avatar
-                  this.nickname = res.data.data.userInfo.nickname
-                  method.request({
-                    url: 'api/v1/user/bindInfo',
-                    method: 'post',
-                    data: {
-                      mobile: this.mobile,
-                      openid: this.openid,
-                      avatar: this.avatar,
-                      nickname: this.nickname,
-                      captcha: this.code
-                    },
-                    success: res => {
-                      wx.setStorage({
-                        key: 'userInfo',
-                        data: res.data.data.userInfo
-                      })
-                      wx.navigateBack({
-                        delta: 1
-                      })
-                    }
+                  wx.setStorage({
+                    key: 'userInfo',
+                    data: res.data.data.userInfo
+                  })
+                  wx.switchTab({
+                    url: '/pages/mine'
                   })
                 }
               })
@@ -191,7 +150,6 @@ export default class Login extends wepy.page {
     },
     // 微信登录
     toWeChat() {
-      // console.log("1111111");
       wx.login({
         success: res => {
           let code = res.code
@@ -218,6 +176,15 @@ export default class Login extends wepy.page {
                 },
                 success: res => {
                   this.openid = res.data.openid
+                  let wxInfo = {
+                    openid: this.openid,
+                    avatar: this.avatar,
+                    nickname: this.nickname
+                  }
+                  wx.setStorage({
+                    key: 'wxInfo',
+                    data: wxInfo
+                  })
                   method.request({
                     url: `api/v1/user/weChatLogin?openid=${this.openid}`,
                     method: 'POST',
@@ -227,15 +194,6 @@ export default class Login extends wepy.page {
                     success: res => {
                       console.log(res)
                       if (res.data.code === '20003') {
-                        let wxInfo = {
-                          openid: this.openid,
-                          avatar: this.avatar,
-                          nickname: this.nickname
-                        }
-                        wx.setStorage({
-                          key: 'wxInfo',
-                          data: wxInfo
-                        })
                         wx.navigateTo({
                           url: '/pages/mobile'
                         })
@@ -272,6 +230,7 @@ export default class Login extends wepy.page {
 </script>
 
 <style lang='less'>
+@import '../style/login.less';
 .beijing {
   width: 346rpx;
   height: 10rpx;

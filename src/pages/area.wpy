@@ -2,9 +2,7 @@
 <template>
   <view class='wrapper'>
     <view class='top1'>
-      <view class='top_img'>
-        <image src='/images/icon_place.png' mode='widthFix' />
-      </view>
+      <image src='/images/icon_place.png' />
       <view @tap="showCity({{item.city_id}},{{item.city_name}})" class='top_ress'>{{message}}</view>
     </view>
     <view class="center">
@@ -42,28 +40,16 @@
       <view @tap="confirm" class="confirm botton">确定</view>
     </view>
   </view>
-  <!-- 面积 -->
+  <!-- 业态 -->
   <view class="modelAcreage" hidden="{{!isShowAcreage}}">
     <view class="top">
       <block wx:for="{{areaList}}" wx:key="">
-        <view @tap="selectItem({{index}},{{item.name}})" data-min_area="{{item.min_area}}" data-max_area="{{item.max_area}}" class="acreage fl {{areaIndex==index?'active':''}}">{{item.name}}</view>
+        <view @tap="selectItem({{index}},{{item.name}})" class="acreage fl {{areaIndex==index?'active':''}}">{{item.name}}</view>
       </block>
+      <view @tap="ensure" class="ensure">确定</view>
     </view>
-    <view class="bottom">
-      <view class="price">自定义面积</view>
-      <view class="count">
-        <view class="left">
-          <input @input="areaDown" class="down" placeholder-style="font-size:26rpx" value="{{areaDown}}" type="text" placeholder="下限">
-          </input>
-          <text class="to">至</text>
-          <input @input="areaUp" class="up" placeholder-style="font-size:26rpx" value="{{areaUp}}" type="text" placeholder="上限">
-          </input>
-        </view>
-        <view @tap="ensure" class="right">
-          <view class="ensure">确定</view>
-        </view>
-      </view>
-    </view>
+
+  </view>
   </view>
   <!-- 售价 -->
   <view class="modelPrice" hidden="{{!isShowPrice}}">
@@ -118,17 +104,17 @@ export default class Area extends wepy.page {
   data = {
     List: [
       { id: 1, name: '区域', msg: '请选择' },
-      { id: 2, name: '面积', msg: '请选择' },
+      { id: 2, name: '业态', msg: '请选择' },
       { id: 3, name: '售价', msg: '请选择' }
     ],
     areaList: [
-      { name: '不限', min_area: 0, max_area: 0 },
-      { name: '20m²以下', min_area: 0, max_area: 20 },
-      { name: '20m²-50m²', min_area: 20, max_area: 50 },
-      { name: '50m²-100m²', min_area: 50, max_area: 100 },
-      { name: '100m²-200m²', min_area: 100, max_area: 200 },
-      { name: '200m²-500m²', min_area: 200, max_area: 500 },
-      { name: '500m²以上', min_area: 500, max_area: 0 }
+      { name: '品牌集合' },
+      { name: '生活配套' },
+      { name: '休闲娱乐' },
+      { name: '零售' },
+      { name: '儿童' },
+      { name: '餐饮美食' },
+      { name: '文创' }
     ],
     priceList: [
       { name: '50万以下', min_price: 0, max_price: 50 },
@@ -141,26 +127,21 @@ export default class Area extends wepy.page {
     message: '深圳',
     isShowMask: false, //遮罩
     isShowArea: false, //区域
-    isShowAcreage: false, //面积
+    isShowAcreage: false, //业态
     isShowPrice: false, //价格
     isShowCity: false, //顶部城市
     cityList: [], //城市列表
     regionList: [], //区域列表
     leftIndex: 0, //区域左边索引
     rightIndex: undefined, //区域右边索引
-    areaIndex: undefined, //面积索引
+    areaIndex: undefined, //业态索引
     priceIndex: undefined, //价格索引
-    areaDown: '', //自定义面积下限
-    areaUp: '', //自定义面积上限
     priceDown: '', //总价下限
     priceUp: '', //总价上限
-    twoArea: '', //二级区域
     regionName: '', //区域名字
-    acreageName: '', //面积名字
+    acreageName: '', //业态名字
     priceName: '', //价格名字
     cityId: 440300, //城市id
-    min_area: '', //最小面积
-    max_area: '', //最大面积
     min_price: '', //最低价格
     max_price: '', //最高价格
     a_id: '' //区域id
@@ -208,7 +189,6 @@ export default class Area extends wepy.page {
     },
     confirm() {
       this.regionList.forEach((item, index) => {
-        // console.log(index)
         if (index === this.leftIndex) {
           this.a_id = item.id
         }
@@ -231,49 +211,22 @@ export default class Area extends wepy.page {
       this.isShowArea = false
       this.isShowMask = false
     },
-    // 面积
+    // 业态
     ensure() {
       this.areaIndex = -1
-      if (this.areaDown > this.areaUp) {
-        wx.showToast({
-          title: '请重新输入',
-          icon: 'none',
-          duration: 1500,
-          mask: false
-        })
-        return
-      }
-      if (this.areaDown || this.areaUp) {
-        this.min_area = parseInt(this.areaDown)
-        this.max_area = parseInt(this.areaUp)
-        this.List.forEach(item => {
-          if (item.id === 2) {
-            item.msg = this.areaDown + 'm²-' + this.areaUp + 'm²'
-            this.areaDown = ''
-            this.areaUp = ''
-          }
-        })
-      } else if (this.acreageName) {
-        this.List.forEach(item => {
-          if (item.id === 2) {
+      this.List.forEach(item => {
+        if (item.id === 2) {
+          if (!this.acreageName) {
+            item.msg = '请选择'
+          } else {
             item.msg = this.acreageName
           }
-        })
-      } else {
-        wx.showToast({
-          title: '请选择面积',
-          icon: 'none',
-          duration: 1500,
-          mask: false
-        })
-        return
-      }
+        }
+      })
       this.isShowAcreage = false
       this.isShowMask = false
     },
     selectItem(index, name, e) {
-      this.min_area = e.currentTarget.dataset.min_area
-      this.max_area = e.currentTarget.dataset.max_area
       this.acreageName = name
       this.areaIndex = index
     },
@@ -340,14 +293,6 @@ export default class Area extends wepy.page {
       this.isShowCity = true
       this.isShowMask = true
     },
-    // 自定义面积下限
-    areaDown(e) {
-      this.areaDown = e.detail.value
-    },
-    // 自定义面积上限
-    areaUp(e) {
-      this.areaUp = e.detail.value
-    },
     //总价上限
     priceDown(e) {
       this.priceDown = e.detail.value
@@ -374,12 +319,11 @@ export default class Area extends wepy.page {
       this.message = city_name
     },
     toList() {
-      var storeSearch = {
+      let storeSearch = {
         cityId: this.cityId,
         a_id: this.a_id,
         trading_area: this.regionName,
-        min_area: this.min_area,
-        max_area: this.max_area,
+        state: this.acreageName,
         min_price: this.min_price,
         max_price: this.max_price
       }
@@ -413,17 +357,14 @@ export default class Area extends wepy.page {
   flex-direction: column;
   color: #999999;
   .top1 {
-    margin: 0 auto;
     display: flex;
-    .top_img {
-      width: 26rpx;
-      height: 30rpx;
-      margin-top: 30rpx;
-      image {
-        width: 26rpx;
-        height: 30rpx;
-      }
+    justify-content: center;
+    image {
+      margin-top: 32rpx;
+      width: 22rpx;
+      height: 38rpx;
     }
+
     .top_ress {
       font-size: 30rpx;
       margin-top: 32rpx;
@@ -462,10 +403,11 @@ export default class Area extends wepy.page {
 }
 // 遮罩
 .mask {
-  position: fixed;
+  position: absolute;
   width: 100%;
   height: 100%;
-  top: 0px;
+  top: 0;
+  left: 0;
   background: rgba(0, 0, 0, 0.4);
 }
 </style>

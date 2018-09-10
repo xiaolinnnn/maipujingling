@@ -64,7 +64,7 @@
     margin: 0 auto;
     display: flex;
     margin-top: 43rpx;
-    border-bottom: 1px solid #ccc;
+    border-bottom: 1rpx solid #ccc;
     .sole_img {
       image {
         width: 200rpx;
@@ -82,12 +82,18 @@
         .r_top1 {
           font-size: 30rpx;
           line-height: 30rpx;
+          display: inline-block;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
         .r_top3 {
           display: inline-block;
           font-size: 22rpx;
           height: 22rpx;
           margin-left: 20rpx;
+           white-space: nowrap;
+           text-overflow: ellipsis;
         }
       }
       .r_center {
@@ -156,7 +162,7 @@
         <view class='choice1_1'>推荐房源</view>
       </view>
       <block wx:for="{{storeList}}" wx:key="">
-        <view @tap="toDetail({{item.id}})" class='choice_box'>
+        <view @tap="todetail({{item.id}})" class='choice_box'>
           <view class='sole_buju'>
             <view class='sole_img'>
               <image src='{{item.img}}' mode='aspectFill' />
@@ -206,7 +212,7 @@
     </view>
   </view>
   <view class="mask" hidden="{{!isShowMask}}"></view>
-<view class="pull iconfont icon-xiao">上拉加载更多!</view>
+  <view class="pull iconfont icon-xiao">上拉加载更多!</view>
 </template>
 
 <script>
@@ -280,7 +286,7 @@ export default class Index extends wepy.page {
       this.isShowCity = false
       this.message = city_name
     },
-    toDetail(id) {
+    todetail(id) {
       wx.navigateTo({
         url: `/pages/investment?id=${id}`
       })
@@ -305,11 +311,11 @@ export default class Index extends wepy.page {
       method: 'GET',
       data: {
         cityId: this.cityId,
-        rows:this.rows,
-        page:this.page
+        rows: this.rows,
+        page: this.page
       },
       success: res => {
-          if (res.data.msg === '没有数据啦!') {
+        if (res.data.msg === '没有数据啦!') {
           wx.showToast({
             title: '没有数据了!',
             icon: 'none',
@@ -331,7 +337,7 @@ export default class Index extends wepy.page {
   }
   //上拉触底
   onReachBottom() {
-   wx.showNavigationBarLoading()
+    wx.showNavigationBarLoading()
     this.page += 1
     this.getStore()
   }

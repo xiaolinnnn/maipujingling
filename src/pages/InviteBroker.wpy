@@ -1,7 +1,6 @@
 <template>
   <view class="container">
     <view class="title">您受邀成为我们的特约经纪人</view>
-    <input type="number" placeholder='请输入您的手机号' />
     <view class="phone mobile">
       <input @input="getMobile" type="number" placeholder='请输入您的手机号' value="{{mobile}}" />
       <view @tap="getCode" class="getCode">验证码</view>
@@ -24,43 +23,105 @@ export default class InviteBroker extends wepy.page {
 
   data = {
     mobile: '',
-    code: ''
+    code: '', //手机验证码
+    user_id: '',
+    codes: '' //用户code码
   }
 
   components = {}
 
   methods = {
     getCode() {
-      // if (!this.mobile.trim()) {
-      //   wx.showToast({
-      //     title: '请输入手机号',
-      //     icon: 'none',
-      //     duration: 1500,
-      //     mask: false
-      //   })
-      //   return
-      // }
-      //  let myreg = /^(((13[0-9]{1})|(15[0-9]{1})|(18[0-9]{1})|(17[0-9]{1}))+\d{8})$/
-      // if (!myreg.test(this.mobile)) {
-      //   wx.showToast({
-      //     title: '手机号有误',
-      //     icon: 'none',
-      //     duration: 1500,
-      //     mask: false
-      //   })
-      //   return false
-      // }
-      method.requset({
+      let myreg = /^(((13[0-9]{1})|(15[0-9]{1})|(18[0-9]{1})|(17[0-9]{1}))+\d{8})$/
+      if (!myreg.test(this.mobile)) {
+        wx.showToast({
+          title: '手机号有误',
+          icon: 'none',
+          duration: 1500,
+          mask: false
+        })
+        return false
+      }
+      method.request({
         url: 'api/v1/sendLoginSms',
         method: 'post',
         data: { mobile: this.mobile },
         success: res => {
-          console.log(res)
+          if (res.data.code === 200) {
+            wx.showToast({
+              title: '发送成功',
+              icon: 'none',
+              duration: 1500,
+              mask: false
+            })
+          } else {
+            wx.showToast({
+              title: '发送失败',
+              icon: 'none',
+              duration: 1500,
+              mask: false
+            })
+          }
         }
       })
     },
     identification() {
-      console.log('11111111')
+      if (!this.mobile.trim()) {
+        wx.showToast({
+          title: '请输入手机号',
+          icon: 'none',
+          duration: 1500,
+          mask: false
+        })
+        return
+      }
+      if (!this.code.trim()) {
+        wx.showToast({
+          title: '请输入验证码',
+          icon: 'none',
+          duration: 1500,
+          mask: false
+        })
+        return
+      }
+      wx.getStorage({
+        key: 'broker',
+        success: res => {
+          this.user_id = res.data.user_id
+          this.codes = res.data.code
+          method.request({
+            url: 'api/v1/agent/certification',
+            method: 'post',
+            data: {
+              mobile: this.mobile,
+              code: this.codes,
+              user_id: this.user_id,
+              captcha: this.code
+            },
+            success: res => {
+              console.log(res)
+              if (res.data.code === 200) {
+                wx.showToast({
+                  title: '认证成功',
+                  icon: 'none',
+                  duration: 1500,
+                  mask: false
+                })
+                wx.switchTab({
+                  url: '/pages/mine'
+                })
+              } else {
+                wx.showToast({
+                  title: res.data.msg,
+                  icon: 'none',
+                  duration: 1500,
+                  mask: false
+                })
+              }
+            }
+          })
+        }
+      })
     },
     // 手机号的值
     getMobile(e) {
@@ -110,6 +171,9 @@ export default class InviteBroker extends wepy.page {
     margin: 153rpx 0 40rpx;
     justify-content: space-between;
     .getCode {
+       position: absolute;
+       right: 120rpx;
+       top: 395rpx;
       width: 136rpx;
       height: 76rpx;
       color: #fff;

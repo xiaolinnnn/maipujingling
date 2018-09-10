@@ -12,13 +12,12 @@
         <text class="phone">{{userInfo.mobile}}</text>
       </view>
     </view>
-    <view class="broker">认证经纪人</view>
+    <view wx:if="{{isShowBroker}}" class="broker">认证经纪人</view>
   </view>
   <!-- 头部 -->
   <view class='mine_top1' wx:if="{{isShowPerson}}">
     <view class='tips'>请先登录</view>
     <view class="login1" @tap="toLogin">登录/注册</view>
-
   </view>
 
   <view @tap="toAttention" class="list one">
@@ -39,7 +38,7 @@
       <text class="iconfont icon-jiantouyou"></text>
     </view>
   </view>
-  <button open-type="share" @tap="toInviteBroker" class="list broker">
+  <button wx:if="{{isShowBroker}}" open-type="share" @tap="toInviteBroker" class="list">
     <view class="left">邀请经纪人</view>
     <view class="right">
       <text class="iconfont icon-jiantouyou"></text>
@@ -87,7 +86,10 @@ export default class Mine extends wepy.page {
   data = {
     isShowPhone: true,
     isShowPerson: true,
-    userInfo: []
+    userInfo: [],
+    token: '',
+    message: '',
+    isShowBroker: false
   }
 
   components = {}
@@ -192,7 +194,30 @@ export default class Mine extends wepy.page {
       }
     },
     // 邀请经纪人
-    toInviteBroker() {}
+    toInviteBroker() {
+      method.request({
+        url: 'api/v1/randomId',
+        data: { token: this.token },
+        success: res => {
+          console.log(res)
+          if (res.data.code === 200) {
+            wx.setStorage({
+              key: 'broker',
+              data: res.data.data
+            })
+          } else {
+            wx.showToast({
+              title: res.data.msg,
+              icon: 'none',
+              duration: 1500,
+              mask: false
+            })
+            return
+          }
+          this.$apply()
+        }
+      })
+    }
   }
 
   events = {}
@@ -208,7 +233,15 @@ export default class Mine extends wepy.page {
       success: res => {
         this.userInfo = res.data
         this.isShowPerson = false
+        this.token = res.data.token
         this.$apply()
+        if (res.data.agent !== 0) {
+          this.isShowBroker = true
+          this.$apply()
+        } else {
+          this.isShowBroker = false
+          this.$apply()
+        }
       }
     })
   }
@@ -216,10 +249,7 @@ export default class Mine extends wepy.page {
     return {
       title: '邀请您成为铺三代经纪人',
       path: '/pages/InviteBroker',
-      imageUrl: './images/background.png',
-      success: res => {
-        console.log(res)
-      }
+      imageUrl: './images/background.png'
     }
   }
 }

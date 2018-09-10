@@ -83,27 +83,13 @@
         <view @tap="confirm" class="confirm botton">确定</view>
       </view>
     </view>
-    <!-- 面积 -->
+    <!-- 业态 -->
     <view class="modelAcreage" hidden="{{!isShowAcreage}}">
       <view class="top">
         <block wx:for="{{areaList}}" wx:key="">
-          <view @tap="selectItem({{index}},{{item.name}})" data-min_area="{{item.min_area}}" data-max_area="{{item.max_area}}" class="head {{areaIndex==index?'active':''}}">{{item.name}}</view>
+          <view @tap="selectItem({{index}},{{item.name}})" class="head {{areaIndex==index?'active':''}}">{{item.name}}</view>
         </block>
-      </view>
-      <view class="bottom">
-        <view class="price">自定义面积</view>
-        <view class="count">
-          <view class="left">
-            <input @input="areaDown" class="down" placeholder-style="font-size:26rpx" value="{{areaDown}}" type="text" placeholder="下限">
-            </input>
-            <text class="to">至</text>
-            <input @input="areaUp" class="up" placeholder-style="font-size:26rpx" value="{{areaUp}}" type="text" placeholder="上限">
-            </input>
-          </view>
-          <view @tap="ensure" class="right">
-            <view class="ensure">确定</view>
-          </view>
-        </view>
+        <view @tap="ensure" class="ensure">确定</view>
       </view>
     </view>
     <!-- 售价 -->
@@ -132,6 +118,7 @@
       </view>
     </view>
   </view>
+  <button @tap="searchHome" class="searchHome" wx:if="{{isShowButton}}" type="warn">让管家帮您找铺</button>
   <!-- 遮罩 -->
   <view class="mask" catchtouchmove="preventD" hidden="{{!isShowMask}}"></view>
   <!-- <view class="pull iconfont icon-xiao">上拉加载更多!</view> -->
@@ -155,7 +142,7 @@ export default class Source extends wepy.page {
         img: '/images/btn_xiala.png'
       },
       {
-        name: '面积',
+        name: '业态',
         img: '/images/btn_xiala.png'
       },
       {
@@ -164,13 +151,13 @@ export default class Source extends wepy.page {
       }
     ],
     areaList: [
-      { name: '不限', min_area: 0, max_area: 0 },
-      { name: '20m²以下', min_area: 0, max_area: 20 },
-      { name: '20m²-50m²', min_area: 20, max_area: 50 },
-      { name: '50m²-100m²', min_area: 50, max_area: 100 },
-      { name: '100m²-200m²', min_area: 100, max_area: 200 },
-      { name: '200m²-500m²', min_area: 200, max_area: 500 },
-      { name: '500m²以上', min_area: 500, max_area: 0 }
+      { name: '品牌集合' },
+      { name: '生活配套' },
+      { name: '休闲娱乐' },
+      { name: '零售' },
+      { name: '儿童' },
+      { name: '餐饮美食' },
+      { name: '文创' }
     ],
     priceList: [
       { name: '50万以下', min_price: 0, max_price: 50 },
@@ -185,29 +172,26 @@ export default class Source extends wepy.page {
       { id: 2, value: '' },
       { id: 3, value: '' }
     ],
+    isShowButton: false,
     isShowMask: false, //遮罩
     isShowArea: false, //区域
-    isShowAcreage: false, //面积
+    isShowAcreage: false, //业态
     isShowPrice: false, //价格
     cityList: [], //城市列表
     regionList: [], //区域列表
     storeList: [],
     leftIndex: 0, //区域左边索引
     rightIndex: undefined, //区域右边索引
-    areaIndex: undefined, //面积索引
+    areaIndex: undefined, //业态索引
     priceIndex: undefined, //价格索引
-    areaDown: '', //自定义面积下限
-    areaUp: '', //自定义面积上限
     priceDown: '', //总价下限
     priceUp: '', //总价上限
     areaName: '', //区域名字
     regionName: '', //商圈名字
-    acreageName: '', //面积名字
+    acreageName: '', //业态名字
     priceName: '', //价格名字
     cityId: 440300, //城市id
     a_id: '', //区域id
-    min_area: '', //最小面积
-    max_area: '', //最大面积
     min_price: '', //最小价格
     max_price: '', //最大价格
     page: 1,
@@ -218,7 +202,16 @@ export default class Source extends wepy.page {
 
   methods = {
     preventD() {},
+    searchHome() {
+      wx.makePhoneCall({
+        phoneNumber: '9999999',
+        success: () => {}
+      })
+    },
     remove(activeId) {
+      if (this.storeList !== 0) {
+        this.isShowButton = false
+      }
       let source = wx.getStorageSync('search')
       this.specific.forEach(item => {
         if (item.id === activeId) {
@@ -226,9 +219,9 @@ export default class Source extends wepy.page {
         }
         if (activeId === 1) {
           source.trading_area = ''
+          source.a_id = ''
         } else if (activeId === 2) {
-          source.min_area = ''
-          source.max_area = ''
+          source.state = ''
         } else if (activeId === 3) {
           source.min_price = ''
           source.max_price = ''
@@ -287,6 +280,11 @@ export default class Source extends wepy.page {
 
     // 区域确定
     confirm() {
+      this.regionList.forEach((item, index) => {
+        if (index === this.leftIndex) {
+          this.a_id = item.id
+        }
+      })
       if (!this.regionName) {
         wx.showToast({
           title: '请选择区域',
@@ -298,6 +296,7 @@ export default class Source extends wepy.page {
       }
       let source = wx.getStorageSync('search')
       source.trading_area = this.regionName
+      source.a_id = this.a_id
       this.specific.forEach(item => {
         if (item.id === 1) {
           item.value = source.trading_area
@@ -317,41 +316,14 @@ export default class Source extends wepy.page {
       this.isShowArea = false
       this.isShowMask = false
     },
-    // 面积确定
+    //业态确定
     ensure() {
       this.areaIndex = -1
-      if (!this.areaDown && !this.areaUp && !this.acreageName) {
-        wx.showToast({
-          title: '请选择面积',
-          icon: 'none',
-          duration: 1500,
-          mask: false
-        })
-        return
-      }
-      if (this.areaDown > this.areaUp) {
-        wx.showToast({
-          title: '请重新输入',
-          icon: 'none',
-          duration: 1500,
-          mask: false
-        })
-        return
-      }
       let source = wx.getStorageSync('search')
-      source.min_area = this.min_area
-      source.max_area = this.max_area
+      source.state = this.acreageName
       this.specific.forEach(item => {
         if (item.id === 2) {
-          if (this.min_area === 0 && this.max_area === 0) {
-            item.value = '不限'
-          } else if (this.areaDown && this.areaUp) {
-            source.min_area = parseInt(this.areaDown)
-            source.max_area = parseInt(this.areaUp)
-            item.value = source.min_area + '-' + source.max_area + 'm²'
-          } else {
-            item.value = source.min_area + '-' + source.max_area + 'm²'
-          }
+          item.value = source.state
         }
       })
       wx.setStorage({
@@ -434,14 +406,6 @@ export default class Source extends wepy.page {
       this.priceName = name
       this.priceIndex = index
     },
-    // 自定义面积下限
-    areaDown(e) {
-      this.areaDown = e.detail.value
-    },
-    // 自定义面积上限
-    areaUp(e) {
-      this.areaUp = e.detail.value
-    },
     //总价上限
     priceDown(e) {
       this.priceDown = e.detail.value
@@ -466,6 +430,23 @@ export default class Source extends wepy.page {
 
   onLoad() {
     this.getData()
+    let source = wx.getStorageSync('search')
+    this.specific.forEach(item => {
+      if (item.id === 1) {
+        item.value = source.trading_area
+      } else if (item.id === 2) {
+        item.value = source.state
+      } else if (item.id === 3) {
+        if (source.min_price || source.max_price) {
+          item.value = source.min_price + '-' + source.max_price + '万'
+        }
+        if (this.priceDown && this.priceUp) {
+          source.min_price = parseInt(this.priceDown)
+          source.max_price = parseInt(this.priceUp)
+          item.value = source.min_price + '-' + source.max_price + '万'
+        }
+      }
+    })
   }
 
   onShow() {}
@@ -479,14 +460,14 @@ export default class Source extends wepy.page {
         cityId: source.cityId,
         a_id: source.a_id,
         trading_area: source.trading_area,
-        min_area: source.min_area,
-        max_area: source.max_area,
+        state: source.state,
         min_price: source.min_price,
         max_price: source.max_price,
         page: this.page,
         rows: this.rows
       },
       success: res => {
+        // console.log(res)
         wx.stopPullDownRefresh()
         if (res.data.code === 404) {
           wx.showToast({
@@ -495,6 +476,10 @@ export default class Source extends wepy.page {
             duration: 1500,
             mask: false
           })
+          if (this.storeList.length === 0) {
+            this.isShowButton = true
+          }
+          this.$apply()
           wx.hideNavigationBarLoading()
         }
         wx.hideNavigationBarLoading()
@@ -603,12 +588,19 @@ page {
         .r_top1 {
           font-size: 30rpx;
           line-height: 30rpx;
+          display: inline-block;
+          white-space: nowrap;
+          // width: 100%;
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
         .r_top3 {
           display: inline-block;
           font-size: 22rpx;
           height: 22rpx;
           margin-left: 20rpx;
+          white-space: nowrap;
+          text-overflow: ellipsis;
         }
       }
       .r_center {
@@ -705,5 +697,16 @@ page {
     }
   }
 }
-
+.searchHome {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 300rpx;
+  height: 50rpx;
+  line-height: 50rpx;
+  text-align: center;
+  font-size: 24rpx;
+  font-weight: bold;
+}
 </style>

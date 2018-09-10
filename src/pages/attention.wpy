@@ -1,5 +1,7 @@
 <template>
   <view class="container container1">
+    <view class="totalCollect">-----收藏总数为
+      <text>{{collectNum}}</text>-----</view>
     <!-- 独家实勘开始 -->
     <view class='choice' hidden="{{!isShow}}">
       <block wx:for="{{shopList}}" wx:key="">
@@ -14,7 +16,7 @@
                   <text>{{item.title}}</text>
                 </view>
                 <view class='r_top3'>
-                  <text>{{item.min_area}}-{{item.max_area}}</text>
+                  <text>{{item.min_area}}-{{item.max_area}}m²</text>
                 </view>
               </view>
               <view class='r_center'>
@@ -63,7 +65,8 @@ export default class Attention extends wepy.page {
     rows: 10, //每页的条数
     page: 1, //当前页数
     isShow: true,
-    token: ''
+    token: '',
+    collectNum: ''
   }
 
   components = {}
@@ -107,6 +110,7 @@ export default class Attention extends wepy.page {
             type: 'invest'
           },
           success: res => {
+            this.collectNum = res.data.data.favor_number
             wx.stopPullDownRefresh()
             if (res.data.msg === '没有数据啦!') {
               wx.showToast({
@@ -118,7 +122,7 @@ export default class Attention extends wepy.page {
             }
             wx.hideNavigationBarLoading()
             if (!!res.data.data) {
-              var shopList = res.data.data //第一页
+              var shopList = res.data.data.invest //第一页
               var oldShopList = this.shopList
               for (var i = 0; i < shopList.length; i++) {
                 oldShopList.push(shopList[i])
@@ -148,6 +152,20 @@ export default class Attention extends wepy.page {
 </script>
 
 <style lang='less'>
+.totalCollect {
+  height: 80rpx;
+  width: 100%;
+  line-height: 80rpx;
+  text-align: center;
+  background-color: #eee;
+  color: #111;
+  font-size: 28rpx;
+  text {
+    color: #ee3e3e;
+    font-weight: bold;
+    font-size: 30rpx;
+  }
+}
 /* common开始 */
 .container1 {
   background: #fff;
@@ -188,12 +206,18 @@ export default class Attention extends wepy.page {
 .r_top1 {
   font-size: 30rpx;
   line-height: 30rpx;
+  display: inline-block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .r_top3 {
   display: inline-block;
   font-size: 22rpx;
   height: 22rpx;
   margin-left: 20rpx;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 .r_center {
   font-size: 26rpx;
@@ -237,16 +261,4 @@ export default class Attention extends wepy.page {
   margin-left: 15rpx;
   margin-top: 10rpx;
 }
-
-/* 独家实勘结束 */
-// .content {
-//   font-size: 30rpx;
-//   position: absolute;
-//   top: 50%;
-//   left: 50%;
-//   transform: translate(-50%, -50%);
-//   text {
-//     color: #00b4d7;
-//   }
-// }
 </style>

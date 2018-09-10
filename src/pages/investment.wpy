@@ -9,7 +9,7 @@
         <image wx:if="{{switchImage}}" src='/images/btn_shoucang_hei.png' mode='aspectFill' />
       </view>
       <view class='bl_right'>
-        <text>收藏</text>
+        <text>关注</text>
       </view>
     </view>
     <view @tap="consult" class='b_center'>
@@ -48,7 +48,7 @@
           <view>项目均价</view>
           <view>面积</view>
           <view class="money">
-            <view>佣金</view>
+            <view wx:if="{{isBroker}}">佣金</view>
             <view>佣金规则</view>
           </view>
         </view>
@@ -58,26 +58,26 @@
           </view>
           <view class="size">{{detailList.min_area}}-{{detailList.max_area}}m²</view>
           <view class="moneys">
-            <text>{{item.commission}}</text>
+            <text>{{detailList.commission}}</text>
           </view>
         </view>
       </view>
       <view class="emit">{{detailList.commission_rule}}
       </view>
-      <view class="project">
-        <view class="left">
+      <view class="projects">
+        <view class="lefts">
           <view>项目类型</view>
           <view>项目地址</view>
           <view>项目业态</view>
           <view>交通</view>
           <view>周边配套</view>
         </view>
-        <view class="right">
+        <view class="rights">
           <view>{{detailList.type}}</view>
           <view>{{detailList.address}}</view>
           <view>{{detailList.state}}</view>
-          <view class="traffic">{{detailList.transport}}</view>
-          <view>{{detailList.around}}</view>
+          <view class="traffics">{{detailList.transport}}</view>
+          <view class="around">{{detailList.around}}</view>
         </view>
       </view>
       <view class="info">信息概况</view>
@@ -115,9 +115,7 @@
         <image src="{{detailList.pic}}">
         </image>
       </view>
-
     </view>
-
   </scroll-view>
 
 </template>
@@ -135,7 +133,8 @@ export default class Investment extends wepy.page {
     detailList: [],
     imageUrl: [],
     switchImage: false,
-    token: ''
+    token: '',
+    isBroker: false
   }
 
   components = {}
@@ -157,57 +156,34 @@ export default class Investment extends wepy.page {
       })
     },
     collect() {
-      wx.getStorage({
-        key: 'userInfo',
-        success: res => {
-          this.token = res.data.token
-          if (this.token) {
-            method.request({
-              url: 'api/v1/store/invest/call',
-              method: 'post',
-              data: {
-                token: this.token,
-                id: this.id
-              },
-              success: res => {
-                console.log(res)
-                if (res.data.msg === '收藏成功') {
-                  this.switchImage = true
-                  wx.showModal({
-                    title: '收藏成功',
-                    content: '是否要去收藏页面',
-                    showCancel: true,
-                    cancelText: '取消',
-                    cancelColor: '#000000',
-                    confirmText: '确定',
-                    confirmColor: '#00B4D7',
-                    success: res => {
-                      if (res.confirm) {
-                        wx.redirectTo({
-                          url: '/pages/attention'
-                        })
-                      }
-                    }
-                  })
-                } else {
-                  wx.showToast({
-                    title: '取消收藏成功',
-                    icon: 'none',
-                    duration: 1500,
-                    mask: false
-                  })
-                  this.switchImage = false
-                }
-                 this.$apply()
-              }
+      let userInfo = wx.getStorageSync('userInfo')
+      if (!userInfo) {
+        wx.navigateTo({
+          url: '/pages/login'
+        })
+      } else {
+        this.token = userInfo.token
+        method.request({
+          url: 'api/v1/store/invest/call',
+          method: 'post',
+          data: {
+            token: this.token,
+            id: this.id
+          },
+          success: res => {
+            this.switchImage = !this.switchImage
+            console.log(res)
+            wx.showToast({
+              title: res.data.msg,
+              icon: 'none',
+              duration: 1500,
+              mask: false
             })
-          } else {
-            wx.navigateTo({
-              url: '/pages/login'
-            })
+
+            this.$apply()
           }
-        }
-      })
+        })
+      }
     },
     // 咨询
     consult() {
@@ -222,6 +198,11 @@ export default class Investment extends wepy.page {
         phoneNumber: '15220695921',
         success: () => {}
       })
+    },
+    onShareAppMessage(opt) {
+      return {
+        title: '买铺精灵'
+      }
     }
   }
 
@@ -233,16 +214,30 @@ export default class Investment extends wepy.page {
 
   onLoad(option) {
     this.id = option.id
+    let userInfo = wx.getStorageSync('userInfo')
+    if (userInfo.agent === 1 || userInfo.agent === 2 || userInfo.agent === 3) {
+      this.isBroker = true
+      this.$apply()
+    }
+    this.token = userInfo.token
     method.request({
       url: 'api/v1/store/invest',
       method: 'GET',
       data: {
-        id: this.id
+        id: this.id,
+        token: this.token
       },
       success: res => {
+        console.log(res)
+
+        // if (res.data.agent !== 0) {
+        //   this.isShowBroker = true
+        //   this.$apply()
+        // }
+        this.switchImage = res.data.data.is_call === 0 ? false : true
         res.data.data.is_call === 0
-          ? (this.switchImage = true)
-          : (this.switchImage = false)
+          ? (this.switchImage = false)
+          : (this.switchImage = true)
         this.detailList = res.data.data
         this.imageUrl.push(res.data.data.pic)
         this.$apply()
@@ -389,29 +384,42 @@ page {
     padding-bottom: 29rpx;
     margin-top: 29rpx;
   }
-  .project {
+  .projects {
     padding: 30rpx 0;
     box-sizing: border-box;
     display: flex;
     line-height: 52rpx;
     margin-top: -26rpx;
     border-bottom: 10rpx solid #f4f4f4;
-    .left {
+    .lefts {
       text-align: justify;
       text-align-last: justify;
       font-size: 26rpx;
       color: #111;
     }
-    .right {
+    .rights {
       color: #666;
       font-size: 26rpx;
       margin-left: 30rpx;
     }
-    .traffic {
+    .traffics {
       width: 550rpx;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+    }
+    .around {
+      width: 550rpx;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .traffics:hover,
+    .around:hover {
+      white-space: normal;
+      transition-property: height;
+      transition-duration: 0.2s;
+      transition-timing-function: linear;
     }
   }
   .info {
