@@ -20,103 +20,101 @@
     </view>
   </view>
   <!-- 定位底部按钮结束 -->
-  <scroll-view height="100%" scroll-y scroll-with-animation @scroll="">
 
-    <!-- 轮播开始 -->
-    <view class='tit_swiper'>
-      <swiper autoplay="{{true}}" indicator-color="rgba(164,163,163,1)" indicator-active-color="#fff" interval="2000" duration="500" indicator-dots="{{true}}" circular="{{true}}">
-        <block wx:for="{{detailList.banner}}" wx:key="">
-          <swiper-item @tap="video({{index}},{{item.video}})">
-            <image src="{{item.url}}" class="slide-image" mode="scaleToFill" />
-          </swiper-item>
+  <!-- 轮播开始 -->
+  <view class='tit_swiper'>
+    <swiper autoplay="{{true}}" indicator-color="rgba(164,163,163,1)" indicator-active-color="#fff" interval="2000" duration="500" indicator-dots="{{true}}" circular="{{true}}">
+      <block wx:for="{{detailList.banner}}" wx:key="">
+        <swiper-item @tap="video({{index}},{{item.video}})">
+          <image src="{{item.url}}" class="slide-image" mode="scaleToFill" />
+        </swiper-item>
+      </block>
+    </swiper>
+  </view>
+  <!-- 轮播结束 -->
+  <!-- 主体部分 -->
+  <view class="main">
+    <view class="address">
+      <view class="detail">{{detailList.title}}</view>
+      <view class="location">
+        <block wx:for="{{detailList.tags}}" wx:key="">
+          <text class="subway">{{item.name}}</text>
         </block>
-      </swiper>
-    </view>
-    <!-- 轮播结束 -->
-    <!-- 主体部分 -->
-    <view class="main">
-      <view class="address">
-        <view class="detail">{{detailList.title}}</view>
-        <view class="location">
-          <block wx:for="{{detailList.tags}}" wx:key="">
-            <text class="subway">{{item.name}}</text>
-          </block>
-        </view>
-      </view>
-      <view class="homeDetail">
-        <view class="left">
-          <view>项目均价</view>
-          <view>面积</view>
-          <view class="money">
-            <view wx:if="{{isBroker}}">佣金</view>
-            <view>佣金规则</view>
-          </view>
-        </view>
-        <view class="right">
-          <view>￥
-            <text>{{detailList.price}}</text>
-          </view>
-          <view class="size">{{detailList.min_area}}-{{detailList.max_area}}m²</view>
-          <view class="moneys">
-            <text>{{detailList.commission}}</text>
-          </view>
-        </view>
-      </view>
-      <view class="emit">{{detailList.commission_rule}}
-      </view>
-      <view class="projects">
-        <view class="lefts">
-          <view>项目类型</view>
-          <view>项目地址</view>
-          <view>项目业态</view>
-          <view>交通</view>
-          <view>周边配套</view>
-        </view>
-        <view class="rights">
-          <view>{{detailList.type}}</view>
-          <view>{{detailList.address}}</view>
-          <view>{{detailList.state}}</view>
-          <view class="traffics">{{detailList.transport}}</view>
-          <view class="around">{{detailList.around}}</view>
-        </view>
-      </view>
-      <view class="info">信息概况</view>
-      <view class="companyDetails">
-        <view class="company">
-          <view class="left">开发商</view>
-          <view class="right">{{detailList.property_dev}}</view>
-        </view>
-        <view class="company">
-          <view class="left">开业时间</view>
-          <view class="right">{{detailList.o_time}}</view>
-        </view>
-        <view class="company">
-          <view class="left">地上停车场</view>
-          <view class="right">{{detailList.u_park}}个</view>
-        </view>
-        <view class="company">
-          <view class="left">地下停车场</view>
-          <view class="right">{{detailList.d_park}}个</view>
-        </view>
-        <view class="company">
-          <view class="left">周边人口</view>
-          <view class="right">{{detailList.population}}</view>
-        </view>
-        <view class="company">
-          <view class="left">项目编号</view>
-          <view class="right">{{detailList.code}}</view>
-        </view>
-        <view class="company">
-          <view class="left">图层项目优势</view>
-          <view @tap="toDetail({{detailList.advantage}})" class="right" id="lookDetail">查看详细</view>
-        </view>
-      </view>
-      <view @tap="previewImg" class="lookPhoto">
-        <image src="{{detailList.pic}}">
-        </image>
       </view>
     </view>
-  </scroll-view>
+    <view class="homeDetail">
+      <view class="left">
+        <view>项目均价</view>
+        <view>面积</view>
+        <view class="money">
+          <view wx:if="{{isBroker}}">佣金</view>
+          <view>佣金规则</view>
+        </view>
+      </view>
+      <view class="right">
+        <view>￥
+          <text>{{detailList.price}}</text>
+        </view>
+        <view class="size">{{detailList.min_area}}-{{detailList.max_area}}m²</view>
+        <view class="moneys">
+          <text>{{detailList.commission}}</text>
+        </view>
+      </view>
+    </view>
+    <view class="emit">{{detailList.commission_rule}}
+    </view>
+    <view class="projects">
+      <view class="lefts">
+        <view>项目类型</view>
+        <view>项目地址</view>
+        <view>项目业态</view>
+        <view>交通</view>
+        <view>周边配套</view>
+      </view>
+      <view class="rights">
+        <view>{{detailList.type}}</view>
+        <view>{{detailList.address}}</view>
+        <view>{{detailList.state}}</view>
+        <view class="traffics">{{detailList.transport}}</view>
+        <view class="around">{{detailList.around}}</view>
+      </view>
+    </view>
+    <view class="info">信息概况</view>
+    <view class="companyDetails">
+      <view class="company">
+        <view class="left">开发商</view>
+        <view class="right">{{detailList.property_dev}}</view>
+      </view>
+      <view class="company">
+        <view class="left">开业时间</view>
+        <view class="right">{{detailList.o_time}}</view>
+      </view>
+      <view class="company">
+        <view class="left">地上停车场</view>
+        <view class="right">{{detailList.u_park}}个</view>
+      </view>
+      <view class="company">
+        <view class="left">地下停车场</view>
+        <view class="right">{{detailList.d_park}}个</view>
+      </view>
+      <view class="company">
+        <view class="left">周边人口</view>
+        <view class="right">{{detailList.population}}</view>
+      </view>
+      <view class="company">
+        <view class="left">项目编号</view>
+        <view class="right">{{detailList.code}}</view>
+      </view>
+      <view class="company">
+        <view class="left">图层项目优势</view>
+        <view @tap="toDetail({{detailList.advantage}})" class="right" id="lookDetail">查看详细</view>
+      </view>
+    </view>
+    <view @tap="previewImg" class="lookPhoto">
+      <image src="{{detailList.pic}}">
+      </image>
+    </view>
+  </view>
 
 </template>
 
@@ -172,7 +170,6 @@ export default class Investment extends wepy.page {
           },
           success: res => {
             this.switchImage = !this.switchImage
-            console.log(res)
             wx.showToast({
               title: res.data.msg,
               icon: 'none',
@@ -228,12 +225,7 @@ export default class Investment extends wepy.page {
         token: this.token
       },
       success: res => {
-        console.log(res)
-
-        // if (res.data.agent !== 0) {
-        //   this.isShowBroker = true
-        //   this.$apply()
-        // }
+        wx.hideLoading()
         this.switchImage = res.data.data.is_call === 0 ? false : true
         res.data.data.is_call === 0
           ? (this.switchImage = false)

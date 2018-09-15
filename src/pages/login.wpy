@@ -38,71 +38,68 @@ export default class Login extends wepy.page {
     code: '', //验证码
     avatar: '', //头像
     nickname: '', //用户名
-    openid: '', //openid
+    openId: '', //openid
     getCode: '获取验证码',
     currentTime: 60,
-    isclick: true
+    isclick: true,
+    unionId: '',
+    iv: '',
+    encryptedData: ''
   }
 
   components = {}
 
   methods = {
     getCode() {
-    wx.showToast({
-      title: "1111111111111",
-      icon: 'none',
-      duration: 1500,
-      mask: false,
-    });
-      // let myreg = /^(((13[0-9]{1})|(15[0-9]{1})|(18[0-9]{1})|(17[0-9]{1}))+\d{8})$/
-      // if (!myreg.test(this.mobile)) {
-      //   wx.showToast({
-      //     title: '手机号有误',
-      //     icon: 'none',
-      //     duration: 1500,
-      //     mask: false
-      //   })
-      //   return false
-      // }
-      // if (!this.isclick) {
-      //   return
-      // }
-      // let currentTime = this.currentTime
-      // this.isclick = false
-      // let interval = setInterval(() => {
-      //   currentTime--
-      //   this.getCode = currentTime + '秒'
-      //   if (currentTime <= 0) {
-      //     this.getCode = '重新发送'
-      //     // this.currentTime = 60
-      //     this.isclick = true
-      //     clearInterval(interval)
-      //     this.$apply()
-      //   }
-      //   this.$apply()
-      // }, 1000)
-      // method.request({
-      //   url: 'api/v1/sendLoginSms',
-      //   method: 'post',
-      //   data: { mobile: this.mobile },
-      //   success: res => {
-      //     if (res.data.code === 200) {
-      //       wx.showToast({
-      //         title: '发送成功',
-      //         icon: 'none',
-      //         duration: 1500,
-      //         mask: false
-      //       })
-      //     } else {
-      //       wx.showToast({
-      //         title: '发送失败',
-      //         icon: 'none',
-      //         duration: 1500,
-      //         mask: false
-      //       })
-      //     }
-      //   }
-      // })
+      let myreg = /^(((13[0-9]{1})|(15[0-9]{1})|(18[0-9]{1})|(17[0-9]{1}))+\d{8})$/
+      if (!myreg.test(this.mobile)) {
+        wx.showToast({
+          title: '手机号有误',
+          icon: 'none',
+          duration: 1500,
+          mask: false
+        })
+        return false
+      }
+      if (!this.isclick) {
+        return
+      }
+      let currentTime = this.currentTime
+      this.isclick = false
+      let interval = setInterval(() => {
+        currentTime--
+        this.getCode = currentTime + '秒'
+        if (currentTime <= 0) {
+          this.getCode = '重新发送'
+          // this.currentTime = 60
+          this.isclick = true
+          clearInterval(interval)
+          this.$apply()
+        }
+        this.$apply()
+      }, 1000)
+      method.request({
+        url: 'api/v1/sendLoginSms',
+        method: 'post',
+        data: { mobile: this.mobile },
+        success: res => {
+          if (res.data.code === 200) {
+            wx.showToast({
+              title: '发送成功',
+              icon: 'none',
+              duration: 1500,
+              mask: false
+            })
+          } else {
+            wx.showToast({
+              title: '发送失败',
+              icon: 'none',
+              duration: 1500,
+              mask: false
+            })
+          }
+        }
+      })
     },
     // 获取手机号
     getMobile(e) {
@@ -113,6 +110,10 @@ export default class Login extends wepy.page {
       this.code = e.detail.value
     },
     toPerson() {
+      wx.showLoading({
+        title: '正在登陆',
+        mask: true
+      })
       if (!this.mobile.trim() || !this.mobile.trim()) {
         wx.showToast({
           title: '请输入手机号或者验证码',
@@ -122,62 +123,60 @@ export default class Login extends wepy.page {
         })
         return
       }
-
       wx.login({
         success: res => {
           wx.getUserInfo({
             withCredentials: 'false',
             lang: 'zh_CN',
-            success: res => {
-              method.request({
-                url: 'api/v1/user/login',
-                method: 'post',
-                data: { mobile: this.mobile, captcha: this.code },
-                success: res => {
-                  wx.setStorage({
-                    key: 'userInfo',
-                    data: res.data.data.userInfo
-                  })
-                  wx.switchTab({
-                    url: '/pages/mine'
-                  })
-                }
-              })
-            }
+            success: res => {}
+          })
+        }
+      })
+      method.request({
+        url: 'api/v1/user/login',
+        method: 'post',
+        data: { mobile: this.mobile, captcha: this.code },
+        success: res => {
+          wx.hideLoading()
+          console.log(res)
+          wx.setStorage({
+            key: 'userInfo',
+            data: res.data.data.userInfo
+          })
+          wx.switchTab({
+            url: '/pages/mine'
           })
         }
       })
     },
+
     // 微信登录
     toWeChat() {
       wx.login({
         success: res => {
           let code = res.code
-          let appId = 'wxa2933d6928dc3849'
-          let secret = '73e472a4bc52e295854c68113f9b712b'
           wx.getUserInfo({
             withCredentials: 'false',
             lang: 'zh_CN',
             success: res => {
-              this.avatar = res.userInfo.avatarUrl
+              //console.log(res)
               this.nickname = res.userInfo.nickName
-              wx.request({
-                url:
-                  'https://api.weixin.qq.com/sns/jscode2session?appid=' +
-                  appId +
-                  '&secret=' +
-                  secret +
-                  '&js_code=' +
-                  code +
-                  '&grant_type=authorization_code',
-                method: 'GET',
-                header: {
-                  'content-type': 'json'
+              this.avatar = res.userInfo.avatarUrl
+              this.iv = res.iv
+              this.encryptedData = res.encryptedData
+              method.request({
+                url: 'api/v1/wxchatInfo',
+                data: {
+                  code: code,
+                  encryptedData: this.encryptedData,
+                  iv: this.iv
                 },
                 success: res => {
-                  this.openid = res.data.openid
+                  this.unionId = JSON.parse(res.data.data).unionId
+                  this.openId = JSON.parse(res.data.data).openId
                   let wxInfo = {
-                    openid: this.openid,
+                    openid: this.openId,
+                    unionid: this.unionId,
                     avatar: this.avatar,
                     nickname: this.nickname
                   }
@@ -186,11 +185,9 @@ export default class Login extends wepy.page {
                     data: wxInfo
                   })
                   method.request({
-                    url: `api/v1/user/weChatLogin?openid=${this.openid}`,
-                    method: 'POST',
-                    data: {
-                      openid: this.openid
-                    },
+                    url: 'api/v1/user/weChatLogin',
+                    method: 'post',
+                    data: { unionid: this.unionId },
                     success: res => {
                       console.log(res)
                       if (res.data.code === '20003') {

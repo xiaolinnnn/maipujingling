@@ -92,8 +92,8 @@
           font-size: 22rpx;
           height: 22rpx;
           margin-left: 20rpx;
-           white-space: nowrap;
-           text-overflow: ellipsis;
+          white-space: nowrap;
+          text-overflow: ellipsis;
         }
       }
       .r_center {
@@ -136,6 +136,14 @@
     }
   }
 }
+.mask {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  background: rgba(102, 102, 102, 0.1);
+}
 </style>
 <template>
   <view class="container">
@@ -150,7 +158,7 @@
       <view class='header'>
         <view class="place" @tap="toCity">
           <image src='/images/icon_dingwei.png'></image>
-          <text>{{message}}</text>
+          <text>{{city_name}}</text>
         </view>
       </view>
     </view>
@@ -232,7 +240,7 @@ export default class Index extends wepy.page {
     isShowMask: false,
     isShowCity: false,
     cityList: [],
-    message: '深圳市',
+    city_name: '深圳市',
     cityId: '440300',
     storeList: [],
     rows: 10, //每页的条数
@@ -245,28 +253,43 @@ export default class Index extends wepy.page {
   methods = {
     toArea() {
       wx.navigateTo({
-        url: '/pages/area'
+        url: `/pages/area?cityId=${this.cityId}&city_name=${this.city_name}`
+      })
+      wx.showLoading({
+        title: '加载中',
+        mask: true
       })
     },
     toCity() {
+      wx.showLoading({
+        title: '加载中',
+        mask: true
+      })
       this.isShowMask = true
       this.isShowCity = true
       method.request({
         url: 'api/v1/opened/city',
         success: res => {
+          wx.hideLoading()
           this.cityList = res.data.data
           this.$apply()
         }
       })
     },
     citys(city_id, city_name) {
+      this.cityId = city_id
+      wx.showLoading({
+        title: '加载中',
+        mask: true
+      })
       method.request({
         url: 'api/v1/small/banner',
         method: 'GET',
         data: {
-          cityId: city_id
+          cityId: this.cityId
         },
         success: res => {
+          wx.hideLoading()
           this.imgUrls = res.data.data
           this.$apply()
         }
@@ -275,7 +298,7 @@ export default class Index extends wepy.page {
           url: 'api/v1/small/invest',
           method: 'GET',
           data: {
-            cityId: city_id
+            cityId: this.cityId
           },
           success: res => {
             this.storeList = res.data.data
@@ -284,11 +307,15 @@ export default class Index extends wepy.page {
         })
       this.isShowMask = false
       this.isShowCity = false
-      this.message = city_name
+      this.city_name = city_name
     },
     todetail(id) {
       wx.navigateTo({
         url: `/pages/investment?id=${id}`
+      })
+      wx.showLoading({
+        title: '加载中',
+        mask: true
       })
     }
   }

@@ -3,7 +3,7 @@
   <view class='wrapper'>
     <view class='top1'>
       <image src='/images/icon_place.png' />
-      <view @tap="showCity({{item.city_id}},{{item.city_name}})" class='top_ress'>{{message}}</view>
+      <view @tap="showCity({{item.city_id}},{{item.city_name}})" class='top_ress'>{{city_name}}</view>
     </view>
     <view class="center">
       <block wx:for="{{List}}" wx:key="">
@@ -82,7 +82,7 @@
       <view class='city'>
         <block wx:for="{{cityList}}" wx:key="">
           <view>
-            <text @tap="citys({{item.city_id}},{{item.city_name}})">{{item.city_name}}</text>
+            <text @tap="citys({{item.city_name}})">{{item.city_name}}</text>
           </view>
         </block>
       </view>
@@ -124,7 +124,7 @@ export default class Area extends wepy.page {
       { name: '300-400万', min_price: 300, max_price: 400 },
       { name: '400万以上', min_price: 400, max_price: 0 }
     ],
-    message: '深圳',
+    city_name: '',
     isShowMask: false, //遮罩
     isShowArea: false, //区域
     isShowAcreage: false, //业态
@@ -141,7 +141,7 @@ export default class Area extends wepy.page {
     regionName: '', //区域名字
     acreageName: '', //业态名字
     priceName: '', //价格名字
-    cityId: 440300, //城市id
+    cityId: '', //城市id
     min_price: '', //最低价格
     max_price: '', //最高价格
     a_id: '' //区域id
@@ -152,12 +152,17 @@ export default class Area extends wepy.page {
   methods = {
     showModel(index, id) {
       if (index === 0) {
+        wx.showLoading({
+          title: '加载中',
+          mask: true
+        })
         this.rightIndex = -1
         method.request({
           url: 'api/v1/area',
           method: 'post',
           data: { cityId: this.cityId },
           success: res => {
+            wx.hideLoading()
             this.regionList = res.data.data
             this.$apply()
           }
@@ -169,7 +174,7 @@ export default class Area extends wepy.page {
         this.isShowAcreage = true
         this.isShowMask = true
       } else {
-        this.areaIndex = -1
+        this.priceIndex = -1
         this.isShowPrice = true
         this.isShowMask = true
       }
@@ -283,9 +288,14 @@ export default class Area extends wepy.page {
     },
     // 城市
     showCity() {
+      wx.showLoading({
+        title: '加载中',
+        mask: true
+      })
       method.request({
         url: 'api/v1/opened/city',
         success: res => {
+          wx.hideLoading()
           this.cityList = res.data.data
           this.$apply()
         }
@@ -302,21 +312,25 @@ export default class Area extends wepy.page {
       this.priceUp = e.detail.value
     },
     // 点击切换城市
-    citys(city_id, city_name) {
-      // console.log(city_id)
-      this.cityId = city_id
+    citys(city_name) {
+      wx.showLoading({
+        title: '加载中',
+        mask: true
+      })
+      // this.cityId = city_id
       method.request({
         url: 'api/v1/area',
         method: 'post',
         data: { cityId: this.cityId },
         success: res => {
+          wx.hideLoading()
           this.regionList = res.data.data
           this.$apply()
         }
       })
       this.isShowCity = false
       this.isShowMask = false
-      this.message = city_name
+      this.city_name = city_name
     },
     toList() {
       let storeSearch = {
@@ -334,6 +348,10 @@ export default class Area extends wepy.page {
       wx.navigateTo({
         url: '/pages/source'
       })
+      wx.showLoading({
+        title: '加载中',
+        mask: true
+      })
     }
   }
 
@@ -343,7 +361,11 @@ export default class Area extends wepy.page {
 
   computed = {}
 
-  onLoad() {}
+  onLoad(option) {
+    this.city_name = option.city_name
+    this.cityId = option.cityId
+    wx.hideLoading()
+  }
 
   onShow() {}
 }

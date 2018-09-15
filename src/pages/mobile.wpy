@@ -85,12 +85,6 @@ export default class Example extends wepy.page {
     },
     //登录
     toPerson() {
-      wx.showToast({
-        title: '111111111111',
-        icon: 'none',
-        duration: 1500,
-        mask: false
-      })
       if (!this.mobile.trim() || !this.code.trim()) {
         wx.showToast({
           title: '请输入手机号或者验证码',
@@ -103,6 +97,8 @@ export default class Example extends wepy.page {
       wx.getStorage({
         key: 'wxInfo',
         success: res => {
+          console.log(res)
+
           method.request({
             url: 'api/v1/user/bindInfo',
             method: 'post',
@@ -110,6 +106,7 @@ export default class Example extends wepy.page {
               mobile: this.mobile,
               captcha: this.code,
               openid: res.data.openid,
+              unionid: res.data.unionid,
               avatar: res.data.avatar,
               nickname: res.data.nickname
             },
