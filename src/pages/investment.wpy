@@ -156,8 +156,8 @@ export default class Investment extends wepy.page {
     collect() {
       let userInfo = wx.getStorageSync('userInfo')
       if (!userInfo) {
-        wx.navigateTo({
-          url: '/pages/login'
+        wx.switchTab({
+          url: '/pages/mine'
         })
       } else {
         this.token = userInfo.token

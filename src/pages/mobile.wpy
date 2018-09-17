@@ -6,8 +6,7 @@
     </view>
 
     <input class="verification" type="number" @input="code" value="{{code}}" placeholder='验证码' />
-    <view class="login">绑定手机号</view>
-    <button class="fake" open-type="getUserInfo" @tap="toPerson">登录</button>
+    <view @tap="toPerson" class="login">绑定手机号</view>
   </view>
 </template>
 
@@ -111,7 +110,6 @@ export default class Example extends wepy.page {
               nickname: res.data.nickname
             },
             success: res => {
-              console.log(res)
               if (res.data.code === 200) {
                 wx.setStorage({
                   key: 'userInfo',
