@@ -226,7 +226,7 @@ export default class Investment extends wepy.page {
       },
       success: res => {
         wx.hideLoading()
-        this.switchImage = res.data.data.is_call === 0 ? false : true
+        // this.switchImage = res.data.data.is_call === 0 ? false : true
         res.data.data.is_call === 0
           ? (this.switchImage = false)
           : (this.switchImage = true)

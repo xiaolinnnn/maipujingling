@@ -49,6 +49,7 @@ export default class extends wepy.app {
   }
   onLaunch() {
     console.log('on launch')
+    wx.removeStorageSync('userInfo')
   }
 }
 </script>

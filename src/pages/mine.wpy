@@ -85,7 +85,10 @@ export default class Mine extends wepy.page {
       { id: 1, name: '我的关注' },
       { id: 2, name: '经纪人认证' },
       { id: 3, name: '我的钱包' }
-    ]
+    ],
+    iv: '',
+    encryptedData: '',
+    unionid: ''
   }
 
   components = {}
@@ -177,7 +180,6 @@ export default class Mine extends wepy.page {
     },
     // 我的关注
     toPerson(id) {
-      console.log(id)
       if (this.isShowPerson === true) {
         wx.showToast({
           title: '请登录',
@@ -233,27 +235,21 @@ export default class Mine extends wepy.page {
 
   computed = {}
 
-  onLoad() {
-    wx.getStorage({
-      key: 'userInfo',
-      success: res => {
-        this.userInfo = res.data
-        this.isShowPerson = false
-        this.token = res.data.token
-        this.$apply()
-        if (res.data.agent !== 0) {
-          this.isShowBroker = true
-          this.$apply()
-        }
-        setTimeout(() => {
-          wx.removeStorage({
-            key: 'userInfo'
-          })
-        }, 2 * 60 * 60 * 1000)
+  onLoad() {}
+  onShow() {
+    this.isShowPerson = true
+    let res = wx.getStorageSync('userInfo')
+    if (res) {
+      this.isShowPerson = false
+      this.userInfo = res
+      if (res.agent !== 0) {
+        this.isShowBroker = true
       }
-    })
+      this.$apply()
+    } else {
+      this.isShowPerson = true
+    }
   }
-  onShow() {}
   onShareAppMessage(opt) {
     return {
       title: '邀请您成为铺三代经纪人',

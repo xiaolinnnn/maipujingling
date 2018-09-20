@@ -1,7 +1,7 @@
 
 // 抽取 基地址
 // 配置
-var baseURL = 'http://api.dgweidao.com/';
+var baseURL = 'https://api.pusandai.cn/';
 
 // 写封装的东西
 var method = {

@@ -110,7 +110,6 @@ export default class Attention extends wepy.page {
             type: 'invest'
           },
           success: res => {
-            this.collectNum = res.data.data.favor_number
             wx.stopPullDownRefresh()
             if (res.data.msg === '没有数据啦!') {
               wx.showToast({
@@ -120,6 +119,7 @@ export default class Attention extends wepy.page {
                 mask: false
               })
             }
+
             wx.hideNavigationBarLoading()
             if (!!res.data.data) {
               var shopList = res.data.data.invest //第一页
@@ -127,6 +127,7 @@ export default class Attention extends wepy.page {
               for (var i = 0; i < shopList.length; i++) {
                 oldShopList.push(shopList[i])
               }
+              this.collectNum = res.data.data.favor_number
               this.shopList = oldShopList
               this.$apply()
             }
